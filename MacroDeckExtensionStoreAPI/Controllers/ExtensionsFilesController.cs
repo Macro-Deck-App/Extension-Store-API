@@ -1,3 +1,4 @@
+using MacroDeckExtensionStoreAPI.Authentication;
 using MacroDeckExtensionStoreLibrary.Exceptions;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Models;
@@ -63,6 +64,7 @@ public class ExtensionsFilesController : ControllerBase
     }
 
     [HttpPost("Upload")]
+    [ApiKey]
     public async Task<IActionResult> PostUploadExtensionFileAsync(IFormFile file)
     {
         ExtensionFile? extensionFile = null;

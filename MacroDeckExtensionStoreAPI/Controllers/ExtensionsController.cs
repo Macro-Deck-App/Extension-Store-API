@@ -1,3 +1,4 @@
+using MacroDeckExtensionStoreAPI.Authentication;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -62,6 +63,7 @@ public class ExtensionsController : ControllerBase
     
 
     [HttpPost]
+    [ApiKey]
     public async Task<IActionResult> PostExtensionAsync(Extension extension)
     {
         await _extensionsRepository.AddExtensionAsync(extension);
@@ -69,6 +71,7 @@ public class ExtensionsController : ControllerBase
     }
 
     [HttpPut]
+    [ApiKey]
     public async Task<IActionResult> PutExtensionAsync(Extension extension)
     {
         try

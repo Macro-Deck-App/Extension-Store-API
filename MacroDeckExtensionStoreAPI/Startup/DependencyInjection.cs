@@ -5,6 +5,7 @@ using MacroDeckExtensionStoreLibrary.Parsers;
 using MacroDeckExtensionStoreLibrary.Repositories;
 using MacroDeckExtensionStoreLibrary.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace MacroDeckExtensionStoreAPI.Startup;
 
@@ -23,10 +24,33 @@ public static class DependencyInjection
     {
         var mySqlConnectionStr = builder.Configuration.GetConnectionString("Default");
         var dataPath = builder.Configuration["Directories:Data"];
+        var apiToken = builder.Configuration["APIToken"];
         builder.Services.AddDbContext<ExtensionStoreDbContext>(options => 
             options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr)));
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                In = ParameterLocation.Header,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                Description = "API Key Authorization header",
+            });
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                {
+                    new OpenApiSecurityScheme {
+                        Reference = new OpenApiReference {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
+        });
         builder.Services.AddScoped<IExtensionsRepository, ExtensionsDbRepository>();
         builder.Services.AddScoped<IExtensionsFilesRepository, ExtensionsFilesFileRepository>(x => new ExtensionsFilesFileRepository(dataPath));
         builder.Services.AddScoped<IGitHubRepositoryLicenseUrlParser, GitHubRepositoryLicenseUrlParser>();

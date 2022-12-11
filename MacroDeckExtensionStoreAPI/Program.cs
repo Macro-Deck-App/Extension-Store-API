@@ -1,3 +1,4 @@
+using MacroDeckExtensionStoreAPI.Authentication;
 using MacroDeckExtensionStoreAPI.Startup;
 
 
