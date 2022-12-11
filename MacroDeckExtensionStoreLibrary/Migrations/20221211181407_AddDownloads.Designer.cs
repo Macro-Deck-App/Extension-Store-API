@@ -3,6 +3,7 @@ using System;
 using MacroDeckExtensionStoreLibrary.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MacroDeckExtensionStoreLibrary.Migrations
 {
     [DbContext(typeof(ExtensionStoreDbContext))]
-    partial class ExtensionStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221211181407_AddDownloads")]
+    partial class AddDownloads
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

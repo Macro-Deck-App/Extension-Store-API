@@ -60,6 +60,8 @@ public class ExtensionsFilesController : ControllerBase
 
         var fileName = $"{packageId}_{version}.macroDeckExtension";
 
+        await _extensionsRepository.CountDownloadAsync(packageId);
+        
         return File(bytes, "application/zip", fileName);
     }
 

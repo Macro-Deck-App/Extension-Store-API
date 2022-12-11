@@ -49,6 +49,14 @@ public class ExtensionsDbRepository : IExtensionsRepository
         return extensionFile;
     }
 
+    public async Task CountDownloadAsync(string packageId)
+    {
+        var extension = await _dbContext.Extensions.FirstOrDefaultAsync(x => x.PackageId == packageId);
+        if (extension == null) return;
+        extension.Downloads += 1;
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task AddExtensionFileAsync(string packageId, ExtensionFile extensionFile)
     {
         var existingExtension = await _dbContext.Extensions.Include(x => x.ExtensionFiles)

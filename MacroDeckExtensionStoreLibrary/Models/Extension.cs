@@ -24,6 +24,8 @@ public class Extension
     
     public string DSupportUserId { get; set; }
 
+    public long Downloads { get; set; } = 0;
+
     [JsonIgnore]
     public IList<ExtensionFile> ExtensionFiles { get; set; } = new List<ExtensionFile>();
 }

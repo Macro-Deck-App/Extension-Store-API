@@ -8,7 +8,7 @@ public class ApiKeyAttribute : Attribute, IAsyncActionFilter
 {
     private const string _appSettingsApiKeyName = "ApiKey";
     private const string _headerApiKeyName = "Authorization";
-        
+    
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         if (!context.HttpContext.Request.Headers.TryGetValue(_headerApiKeyName, out var extractedApiKey))
