@@ -10,12 +10,15 @@ public class ExtensionsController : ControllerBase
 {
     private readonly ILogger<ExtensionsController> _logger;
     private readonly IExtensionsRepository _extensionsRepository;
+    private readonly IExtensionsFilesRepository _extensionsFilesRepository;
 
     public ExtensionsController(ILogger<ExtensionsController> logger,
-        IExtensionsRepository extensionsRepository)
+        IExtensionsRepository extensionsRepository,
+        IExtensionsFilesRepository extensionsFilesRepository)
     {
         _logger = logger;
         _extensionsRepository = extensionsRepository;
+        _extensionsFilesRepository = extensionsFilesRepository;
     }
 
 
@@ -35,6 +38,28 @@ public class ExtensionsController : ControllerBase
         }
         return Ok(extension);
     }
+
+    [HttpGet("Icon/{packageId}")]
+    public async Task<IActionResult> GetIconAsync(string packageId)
+    {
+        var extensionFiles = await _extensionsRepository.GetExtensionFilesAsync(packageId);
+        if (extensionFiles.Length == 0)
+        {
+            return NotFound("Package Id does not exist or does not contain any files yet.");
+        }
+        var latestExtensionFile = extensionFiles.OrderBy(x => x.UploadDateTime).First();
+        var iconPath = Path.Combine(_extensionsFilesRepository.ExtensionsPath, latestExtensionFile.IconFileName);
+        if (!System.IO.File.Exists(iconPath))
+        {
+            return NotFound("No icon file found");
+        }
+
+        var iconFileStream = System.IO.File.Open(iconPath, FileMode.Open, FileAccess.Read, FileShare.None);
+        iconFileStream.Seek(0, SeekOrigin.Begin);
+
+        return File(iconFileStream, "image/jpg");
+    }
+    
 
     [HttpPost]
     public async Task<IActionResult> PostExtensionAsync(Extension extension)
