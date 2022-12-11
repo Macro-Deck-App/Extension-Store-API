@@ -3,6 +3,7 @@ using System;
 using MacroDeckExtensionStoreLibrary.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MacroDeckExtensionStoreLibrary.Migrations
 {
     [DbContext(typeof(ExtensionStoreDbContext))]
-    partial class ExtensionStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221203202229_ChangedFileName")]
+    partial class ChangedFileName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,7 +61,7 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("DescriptionHtml")
+                    b.Property<string>("DescriptionMarkup")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -70,11 +72,7 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("LicenseName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("LicenseUrl")
+                    b.Property<string>("License")
                         .IsRequired()
                         .HasColumnType("longtext");
 

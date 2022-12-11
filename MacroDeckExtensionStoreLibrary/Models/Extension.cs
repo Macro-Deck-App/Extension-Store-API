@@ -21,6 +21,8 @@ public class Extension
     public string Author { get; set; }
     
     public string GitHubRepository { get; set; }
+    
+    public string DSupportUserId { get; set; }
 
     [JsonIgnore]
     public IList<ExtensionFile> ExtensionFiles { get; set; } = new List<ExtensionFile>();

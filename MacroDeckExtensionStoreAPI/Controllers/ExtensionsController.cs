@@ -31,7 +31,7 @@ public class ExtensionsController : ControllerBase
         var extension = await _extensionsRepository.GetExtensionByPackageIdAsync(packageId);
         if (extension == null)
         {
-            return NotFound();
+            return NotFound("Package Id not found");
         }
         return Ok(extension);
     }
@@ -53,7 +53,7 @@ public class ExtensionsController : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return UnprocessableEntity();
+            return NotFound("Package Id not found");
         }
     }
     

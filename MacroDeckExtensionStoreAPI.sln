@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeckExtensionStoreAPI"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeckExtensionStoreLibrary", "MacroDeckExtensionStoreLibrary\MacroDeckExtensionStoreLibrary.csproj", "{66C77450-5F8E-41CE-9951-73AE418A1B40}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeckExtensionStoreTests", "MacroDeckExtensionStoreTests\MacroDeckExtensionStoreTests.csproj", "{22D634B0-1302-4566-B427-4F7E88812B5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{66C77450-5F8E-41CE-9951-73AE418A1B40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66C77450-5F8E-41CE-9951-73AE418A1B40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66C77450-5F8E-41CE-9951-73AE418A1B40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22D634B0-1302-4566-B427-4F7E88812B5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22D634B0-1302-4566-B427-4F7E88812B5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22D634B0-1302-4566-B427-4F7E88812B5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22D634B0-1302-4566-B427-4F7E88812B5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
