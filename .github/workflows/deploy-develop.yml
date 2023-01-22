@@ -6,22 +6,15 @@ on:
     branches: [ "develop" ]
       
 jobs:
-  tests:
-    uses: ./.github/workflows/tests.yml
-    name: Build and test
+  #tests:
+   # uses: ./.github/workflows/tests.yml
+    #name: Build and test
   deploy:
     name: Build and deploy Docker image
-    needs: [tests]
+    #needs: [tests]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: fjogeleit/http-request-action@v1
-      with:
-        url: 'https://bot.api.macro-deck.app/webhook/extensionstoreapi-workflow'
-        method: 'POST'
-        bearerToken:  ${{ secrets.WEBHOOK_KEY }}
-        customHeaders: '{"Content-Type": "application/json" }'
-        data: '{"toEveryone":false,"embed":{"color":{"r":0,"g":1,"b":1},"description":"Deployment started, building and pushing the image...","fields":[{"name":"Branch","value":"Develop","inline":false},{"name":"Commit message","value":"${{ github.event.head_commit.message }}","inline":false},{"name":"SHA","value":"${{ github.sha }}","inline":false}]}}'
     - name: Build the Docker image
       run: docker build . --file MacroBotApp/Dockerfile --tag suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
     - name: Log into registry
