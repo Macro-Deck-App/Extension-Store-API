@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file MacroBotApp/Dockerfile --tag suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
+      run: docker build . --file MacroDeckExtensionStoreAPI/Dockerfile --tag suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
     - name: Log into registry
       uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
       with:
