@@ -7,7 +7,7 @@ on:
       
 jobs:
   tests:
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/tests.yml
     name: Build and test
   deploy:
     name: Build and deploy Docker image
