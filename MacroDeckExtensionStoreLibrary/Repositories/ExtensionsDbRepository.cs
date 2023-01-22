@@ -13,6 +13,7 @@ public class ExtensionsDbRepository : IExtensionsRepository
     public ExtensionsDbRepository(ExtensionStoreDbContext dbContext)
     {
         _dbContext = dbContext;
+        dbContext.Database.EnsureCreated();
     }
     
     public async Task<Extension[]> GetExtensionsAsync()
