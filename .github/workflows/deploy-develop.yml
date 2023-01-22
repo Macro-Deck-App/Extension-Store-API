@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: fjogeleit/http-request-action@v1
       with:
-        url: 'https://testbot.api.macro-deck.app/webhook/deploy'
+        url: 'https://bot.api.macro-deck.app/webhook/extensionstoreapi-workflow'
         method: 'POST'
         bearerToken:  ${{ secrets.WEBHOOK_KEY }}
         customHeaders: '{"Content-Type": "application/json" }'
@@ -32,13 +32,6 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Push the Docker image
       run: docker push suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
-    - uses: fjogeleit/http-request-action@v1
-      with:
-        url: 'https://testbot.api.macro-deck.app/webhook/deploy'
-        method: 'POST'
-        bearerToken:  ${{ secrets.WEBHOOK_KEY }}
-        customHeaders: '{"Content-Type": "application/json" }'
-        data: '{"toEveryone":false,"embed":{"color":{"r":0,"g":1,"b":0},"description":"Push successful, updating the container now...","fields":[{"name":"Branch","value":"Develop","inline":false},{"name":"Commit message","value":"${{ github.event.head_commit.message }}","inline":false},{"name":"SHA","value":"${{ github.sha }}","inline":false}]}}'
     - name: Updating the image on the server
       uses: appleboy/ssh-action@v0.1.7
       with:
@@ -49,3 +42,11 @@ jobs:
         script: |
           cd "scripts/ExtensionStoreAPI/"
           ./update_develop.sh dev_${{ github.sha }}
+    - uses: fjogeleit/http-request-action@v1
+      with:
+        url: 'https://bot.api.macro-deck.app/webhook/extensionstoreapi-workflow'
+        method: 'POST'
+        bearerToken:  ${{ secrets.WEBHOOK_KEY }}
+        customHeaders: '{"Content-Type": "application/json" }'
+        data: '{"toEveryone":false,"embed":{"color":{"r":0,"g":1,"b":0},"description":"https://test.extensionstore.api.macro-deck.app is now on dev_${{ github.sha }}","fields":[{"name":"Branch","value":"Develop","inline":false},{"name":"Commit message","value":"${{ github.event.head_commit.message }}","inline":false},{"name":"SHA","value":"${{ github.sha }}","inline":false}]}}'
+    
