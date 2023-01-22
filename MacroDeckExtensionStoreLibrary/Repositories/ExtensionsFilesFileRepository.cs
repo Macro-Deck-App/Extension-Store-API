@@ -1,3 +1,4 @@
+using MacroDeckExtensionStoreLibrary.Enums;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using MacroDeckExtensionStoreLibrary.Utils;
@@ -79,8 +80,17 @@ public class ExtensionsFilesFileRepository : IExtensionsFilesRepository
         var finalFileName = GenerateUniqueFileName(manifest);
         var packageFileName = $"{finalFileName}.zip";
         var iconFileName = $"{finalFileName}.png";
-        
-        var iconMemoryStream = await ExtensionIconExtractor.FromZipFilePathAsync(tmpFilePath);
+
+        Stream? iconMemoryStream;
+        if (manifest.Type == ExtensionType.Plugin)
+        {
+            iconMemoryStream = await ExtensionIconExtractor.FromZipFilePathAsync(tmpFilePath);
+        }
+        else
+        {
+            iconMemoryStream = await ExtensionIconExtractor.GeneratePreviewImage(tmpFilePath);
+        }
+
         if (iconMemoryStream == null) throw new InvalidDataException();
         await using var iconFileStream = File.Create(Path.Combine(ExtensionsPath, iconFileName));
         iconMemoryStream.Seek(0, SeekOrigin.Begin);
