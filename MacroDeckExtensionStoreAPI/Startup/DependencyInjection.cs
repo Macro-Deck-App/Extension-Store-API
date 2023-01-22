@@ -12,15 +12,6 @@ namespace MacroDeckExtensionStoreAPI.Startup;
 
 public static class DependencyInjection
 {
-    public static void ConfigureAppSettings(this WebApplicationBuilder builder)
-    {
-        builder.Configuration
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", false, true)
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", true, true)
-            .AddEnvironmentVariables();
-    }
-    
     public static async Task ConfigureAsync(this WebApplicationBuilder builder)
     {
         Paths.EnsureDirectoriesCreated();
