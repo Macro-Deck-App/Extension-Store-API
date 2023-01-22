@@ -1,4 +1,5 @@
 using System.Net;
+using MacroDeckExtensionStoreAPI.Config;
 using MacroDeckExtensionStoreLibrary.Data;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Parsers;
@@ -20,11 +21,14 @@ public static class DependencyInjection
             .AddEnvironmentVariables();
     }
     
-    public static void Configure(this WebApplicationBuilder builder)
+    public static async Task ConfigureAsync(this WebApplicationBuilder builder)
     {
-        var mySqlConnectionStr = builder.Configuration.GetConnectionString("Default");
-        var dataPath = builder.Configuration["Directories:Data"];
-        var apiToken = builder.Configuration["APIToken"];
+        Paths.EnsureDirectoriesCreated();
+        var dataDirectory = Paths.DataDirectory;
+        var appConfig = await AppConfig.LoadAsync(Paths.AppConfigPath);
+        var databaseConfig = await DatabaseConfig.LoadAsync(Paths.DatabaseConfigPath);
+        var mySqlConnectionStr = databaseConfig.ToConnectionString();
+        
         builder.Services.AddDbContext<ExtensionStoreDbContext>(options => 
             options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr)));
         builder.Services.AddEndpointsApiExplorer();
@@ -47,20 +51,17 @@ public static class DependencyInjection
                             Id = "Bearer"
                         }
                     },
-                    new string[] {}
+                    Array.Empty<string>()
                 }
             });
         });
         builder.Services.AddScoped<IExtensionsRepository, ExtensionsDbRepository>();
-        builder.Services.AddScoped<IExtensionsFilesRepository, ExtensionsFilesFileRepository>(x => new ExtensionsFilesFileRepository(dataPath));
+        builder.Services.AddScoped<IExtensionsFilesRepository, ExtensionsFilesFileRepository>(x =>
+            new ExtensionsFilesFileRepository(dataDirectory));
         builder.Services.AddScoped<IGitHubRepositoryLicenseUrlParser, GitHubRepositoryLicenseUrlParser>();
         builder.Services.AddScoped<IGitHubRepositoryService, GitHubRepositoryService>();
         builder.Services.AddScoped<HttpClient>();
-        
-        // services.AddTransient<ICustomerRepository, CustomerDbRepository>();
-        // services.AddTransient<IInvoiceRepository, InvoiceDbRepository>();
-        // services.AddTransient<IInvoiceGenerator, InvoiceGenerator>();
-        
+        builder.Services.AddSingleton(appConfig);
         
         builder.Services.AddControllers();
     }

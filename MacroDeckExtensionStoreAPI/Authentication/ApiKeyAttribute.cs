@@ -1,3 +1,4 @@
+using MacroDeckExtensionStoreAPI.Config;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -6,26 +7,25 @@ namespace MacroDeckExtensionStoreAPI.Authentication;
 [AttributeUsage(validOn: AttributeTargets.Method)]
 public class ApiKeyAttribute : Attribute, IAsyncActionFilter
 {
-    private const string _appSettingsApiKeyName = "ApiKey";
-    private const string _headerApiKeyName = "Authorization";
+    private const string HeaderApiKeyName = "Authorization";
     
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        if (!context.HttpContext.Request.Headers.TryGetValue(_headerApiKeyName, out var extractedApiKey))
+        if (!context.HttpContext.Request.Headers.TryGetValue(HeaderApiKeyName, out var extractedApiKey))
         {
             context.Result = new ContentResult()
             {
-                StatusCode = 401
+                StatusCode = StatusCodes.Status401Unauthorized
             };
             return;
         }
-        var appSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
-        var apiKey = $"Bearer {appSettings.GetValue<string>(_appSettingsApiKeyName)}";
+        var appConfig = context.HttpContext.RequestServices.GetRequiredService<AppConfig>();
+        var apiKey = $"Bearer {appConfig.ApiToken}";
         if (!apiKey.Equals(extractedApiKey))
         {
             context.Result = new ContentResult()
             {
-                StatusCode = 403
+                StatusCode = StatusCodes.Status403Forbidden
             };
             return;
         }

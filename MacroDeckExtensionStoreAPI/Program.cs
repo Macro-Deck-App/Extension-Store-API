@@ -4,7 +4,7 @@ using MacroDeckExtensionStoreAPI.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.ConfigureAppSettings();
-builder.Configure();
+await builder.ConfigureAsync();
 
 var app = builder.Build();
 
