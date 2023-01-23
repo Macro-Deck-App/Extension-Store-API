@@ -15,13 +15,15 @@ public static class DependencyInjection
     {
         Paths.EnsureDirectoriesCreated();
         var dataDirectory = Paths.DataDirectory;
+        
         var appConfig = await AppConfig.LoadAsync(Paths.AppConfigPath);
         var databaseConfig = await DatabaseConfig.LoadAsync(Paths.DatabaseConfigPath);
+        
         var psqlConnectionStr = databaseConfig.ToConnectionString();
-
         builder.Services.AddDbContext<ExtensionStoreDbContext>(options =>
             options.UseNpgsql(psqlConnectionStr));
-        builder.Services.AddEndpointsApiExplorer();
+        
+        builder.Services.AddSwagger();
         
         builder.Services.AddScoped<IExtensionsRepository, ExtensionsDbRepository>();
         builder.Services.AddScoped<IExtensionsFilesRepository, ExtensionsFilesFileRepository>(x =>

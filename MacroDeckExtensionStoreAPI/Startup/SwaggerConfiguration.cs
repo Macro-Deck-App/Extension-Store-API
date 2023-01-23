@@ -6,6 +6,7 @@ public static class SwaggerConfiguration
 {
     public static void AddSwagger(this IServiceCollection services)
     {
+        services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(c =>
         {
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
