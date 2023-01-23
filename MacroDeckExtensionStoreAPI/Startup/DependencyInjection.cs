@@ -1,6 +1,11 @@
 using MacroDeckExtensionStoreAPI.Config;
 using MacroDeckExtensionStoreLibrary.DataAccess;
+using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
+using MacroDeckExtensionStoreLibrary.DataAccess.Repositories;
+using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
 using MacroDeckExtensionStoreLibrary.Interfaces;
+using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
+using MacroDeckExtensionStoreLibrary.Managers;
 using MacroDeckExtensionStoreLibrary.Parsers;
 using MacroDeckExtensionStoreLibrary.Repositories;
 using MacroDeckExtensionStoreLibrary.Services;
@@ -17,22 +22,22 @@ public static class DependencyInjection
         var dataDirectory = Paths.DataDirectory;
         
         var appConfig = await AppConfig.LoadAsync(Paths.AppConfigPath);
-        var databaseConfig = await DatabaseConfig.LoadAsync(Paths.DatabaseConfigPath);
+        builder.Services.AddSingleton(appConfig);
         
+        var databaseConfig = await DatabaseConfig.LoadAsync(Paths.DatabaseConfigPath);
         var psqlConnectionStr = databaseConfig.ToConnectionString();
         builder.Services.AddDbContext<ExtensionStoreDbContext>(options =>
             options.UseNpgsql(psqlConnectionStr));
         
-        builder.Services.AddSwagger();
-        
-        builder.Services.AddScoped<IExtensionsRepository, ExtensionsDbRepository>();
-        builder.Services.AddScoped<IExtensionsFilesRepository, ExtensionsFilesFileRepository>(x =>
-            new ExtensionsFilesFileRepository(dataDirectory));
+        builder.Services.AddScoped<IExtensionRepository, ExtensionRepository>();
+        builder.Services.AddScoped<IExtensionManager, ExtensionManager>();
+        builder.Services.AddScoped<IExtensionFileRepository, ExtensionFileRepository>();
+
         builder.Services.AddScoped<IGitHubRepositoryLicenseUrlParser, GitHubRepositoryLicenseUrlParser>();
         builder.Services.AddScoped<IGitHubRepositoryService, GitHubRepositoryService>();
         builder.Services.AddScoped<HttpClient>();
-        builder.Services.AddSingleton(appConfig);
         
+        builder.Services.AddSwagger();
         builder.Services.AddControllers();
     }
 }

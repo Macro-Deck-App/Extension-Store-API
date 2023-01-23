@@ -1,7 +1,9 @@
 using MacroDeckExtensionStoreAPI.Authentication;
-using MacroDeckExtensionStoreLibrary.Interfaces;
+using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace MacroDeckExtensionStoreAPI.Controllers;
 
@@ -9,17 +11,16 @@ namespace MacroDeckExtensionStoreAPI.Controllers;
 [Route("[controller]")]
 public class ExtensionsController : ControllerBase
 {
-    private readonly ILogger<ExtensionsController> _logger;
-    private readonly IExtensionsRepository _extensionsRepository;
-    private readonly IExtensionsFilesRepository _extensionsFilesRepository;
+    private readonly ILogger _logger = Log.ForContext<ExtensionsController>();
+    
+    private readonly IExtensionRepository _extensionRepository;
+    private readonly IExtensionFileRepository _extensionFileRepository;
 
-    public ExtensionsController(ILogger<ExtensionsController> logger,
-        IExtensionsRepository extensionsRepository,
-        IExtensionsFilesRepository extensionsFilesRepository)
+    public ExtensionsController(IExtensionRepository extensionRepository,
+        IExtensionFileRepository extensionFileRepository)
     {
-        _logger = logger;
-        _extensionsRepository = extensionsRepository;
-        _extensionsFilesRepository = extensionsFilesRepository;
+        _extensionRepository = extensionRepository;
+        _extensionFileRepository = extensionFileRepository;
     }
 
 

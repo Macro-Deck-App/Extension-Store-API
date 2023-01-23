@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MacroDeckExtensionStoreLibrary.Repositories;
 
-public class ExtensionsDbRepository : IExtensionsRepository
+public class ExtensionsDbRepository
 {
     private readonly ExtensionStoreDbContext _dbContext;
     private readonly IMapper _mapper;

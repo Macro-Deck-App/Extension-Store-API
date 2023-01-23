@@ -5,7 +5,7 @@ using MacroDeckExtensionStoreLibrary.Utils;
 
 namespace MacroDeckExtensionStoreLibrary.Repositories;
 
-public class ExtensionsFilesFileRepository : IExtensionsFilesRepository
+public class ExtensionsFilesFileRepository
 {
     public string BasePath { get; }
     public string TmpPath { get; }
