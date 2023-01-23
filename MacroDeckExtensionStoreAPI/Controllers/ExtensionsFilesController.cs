@@ -1,3 +1,4 @@
+using AutoMapper;
 using MacroDeckExtensionStoreAPI.Authentication;
 using MacroDeckExtensionStoreLibrary.Exceptions;
 using MacroDeckExtensionStoreLibrary.Interfaces;
@@ -14,16 +15,19 @@ public class ExtensionsFilesController : ControllerBase
     private readonly IExtensionsRepository _extensionsRepository;
     private readonly IExtensionsFilesRepository _extensionsFilesRepository;
     private readonly IGitHubRepositoryService _gitHubRepositoryService;
+    private readonly IMapper _mapper;
 
     public ExtensionsFilesController(ILogger<ExtensionsFilesController> logger,
         IExtensionsRepository extensionsRepository,
         IExtensionsFilesRepository extensionsFilesRepository,
-        IGitHubRepositoryService gitHubRepositoryService)
+        IGitHubRepositoryService gitHubRepositoryService,
+        IMapper mapper)
     {
         _logger = logger;
         _extensionsRepository = extensionsRepository;
         _extensionsFilesRepository = extensionsFilesRepository;
         _gitHubRepositoryService = gitHubRepositoryService;
+        _mapper = mapper;
     }
     
     [HttpGet("{packageId}")]
@@ -67,7 +71,7 @@ public class ExtensionsFilesController : ControllerBase
 
     [HttpPost("Upload")]
     [ApiKey]
-    public async Task<IActionResult> PostUploadExtensionFileAsync(IFormFile file)
+    public async Task<ActionResult<ExtensionFile>> PostUploadExtensionFileAsync(IFormFile file)
     {
         ExtensionFile? extensionFile = null;
         try
@@ -76,18 +80,10 @@ public class ExtensionsFilesController : ControllerBase
             var result = await _extensionsFilesRepository.SaveExtensionFileFromStreamAsync(stream);
             var license = await _gitHubRepositoryService.GetLicenseAsync(result.ExtensionManifest.Repository);
             var descriptionHtml = await _gitHubRepositoryService.GetReadmeAsync(result.ExtensionManifest.Repository);
-            extensionFile = new ExtensionFile()
-            {
-                Version = result.ExtensionManifest.Version,
-                PackageFileName = result.PackageFileName,
-                MinAPIVersion = result.ExtensionManifest.TargetPluginAPIVersion,
-                IconFileName = result.IconFileName,
-                UploadDateTime = DateTime.Now,
-                MD5Hash = result.MD5,
-                LicenseName = license.Name,
-                LicenseUrl = license.Url,
-                DescriptionHtml = descriptionHtml
-            };
+            extensionFile = _mapper.Map<ExtensionFile>(result);
+            extensionFile.LicenseName = license.Name;
+            extensionFile.LicenseUrl = license.Url;
+            extensionFile.DescriptionHtml = descriptionHtml;
             await _extensionsRepository.AddExtensionFileAsync(result.ExtensionManifest.PackageId, extensionFile);
 
             return Ok(result);

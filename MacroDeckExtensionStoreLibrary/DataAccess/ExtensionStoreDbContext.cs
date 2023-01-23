@@ -1,3 +1,4 @@
+using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.EntityConfigurations;
 using MacroDeckExtensionStoreLibrary.Models;
 using Microsoft.EntityFrameworkCore;
@@ -6,8 +7,8 @@ namespace MacroDeckExtensionStoreLibrary.DataAccess;
 
 public class ExtensionStoreDbContext : DbContext
 {
-    public DbSet<Extension> Extensions => Set<Extension>();
-    public DbSet<ExtensionFile> ExtensionFiles => Set<ExtensionFile>();
+    public DbSet<ExtensionEntity> ExtensionEntities => Set<ExtensionEntity>();
+    public DbSet<ExtensionFileEntity> ExtensionFileEntities => Set<ExtensionFileEntity>();
 
     public ExtensionStoreDbContext(DbContextOptions<ExtensionStoreDbContext> options) : base(options)
     {

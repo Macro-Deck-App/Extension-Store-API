@@ -6,7 +6,7 @@ public class ExtensionFileEntity
     
     public string Version { get; set; }
     
-    public int MinAPIVersion { get; set; }
+    public int MinApiVersion { get; set; }
     
     public string PackageFileName { get; set; }
     

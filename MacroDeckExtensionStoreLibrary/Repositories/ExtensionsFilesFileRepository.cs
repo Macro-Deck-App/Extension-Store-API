@@ -107,7 +107,11 @@ public class ExtensionsFilesFileRepository : IExtensionsFilesRepository
         try
         {
             File.Delete(tmpFilePath);
-        } catch (Exception) {}
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
 
         var result = new ExtensionFileUploadResult()
         {

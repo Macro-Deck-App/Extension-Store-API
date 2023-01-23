@@ -19,7 +19,7 @@ public class ExtensionFileEntityConfig : IEntityTypeConfiguration<ExtensionFileE
         builder.Property(p => p.Version)
             .HasColumnName(ColumnPrefix + "version")
             .IsRequired();
-        builder.Property(p => p.MinAPIVersion)
+        builder.Property(p => p.MinApiVersion)
             .HasColumnName(ColumnPrefix + "min_api_version")
             .IsRequired();
         builder.Property(p => p.PackageFileName)
