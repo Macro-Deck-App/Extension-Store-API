@@ -1,4 +1,4 @@
-using MacroDeckExtensionStoreLibrary.Data;
+using MacroDeckExtensionStoreLibrary.DataAccess;
 using MacroDeckExtensionStoreLibrary.Exceptions;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Models;

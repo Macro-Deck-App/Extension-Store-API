@@ -1,3 +1,4 @@
+using MacroDeckExtensionStoreAPI.Extensions;
 using MacroDeckExtensionStoreAPI.Startup;
 
 
@@ -9,4 +10,5 @@ var app = builder.Build();
 app.ConfigureSwagger();
 app.UseAuthorization();
 app.MapControllers();
-app.Run();
+await app.MigrateDatabaseAsync();
+await app.RunAsync();

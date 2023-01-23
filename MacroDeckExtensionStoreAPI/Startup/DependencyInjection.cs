@@ -1,6 +1,5 @@
-using System.Net;
 using MacroDeckExtensionStoreAPI.Config;
-using MacroDeckExtensionStoreLibrary.Data;
+using MacroDeckExtensionStoreLibrary.DataAccess;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Parsers;
 using MacroDeckExtensionStoreLibrary.Repositories;
@@ -16,36 +15,16 @@ public static class DependencyInjection
     {
         Paths.EnsureDirectoriesCreated();
         var dataDirectory = Paths.DataDirectory;
+        
         var appConfig = await AppConfig.LoadAsync(Paths.AppConfigPath);
         var databaseConfig = await DatabaseConfig.LoadAsync(Paths.DatabaseConfigPath);
-        var mySqlConnectionStr = databaseConfig.ToConnectionString();
         
-        builder.Services.AddDbContext<ExtensionStoreDbContext>(options => 
-            options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr)));
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(c =>
-        {
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-            {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                In = ParameterLocation.Header,
-                Scheme = "Bearer",
-                BearerFormat = "JWT",
-                Description = "API Key Authorization header",
-            });
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-                {
-                    new OpenApiSecurityScheme {
-                        Reference = new OpenApiReference {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        });
+        var psqlConnectionStr = databaseConfig.ToConnectionString();
+        builder.Services.AddDbContext<ExtensionStoreDbContext>(options =>
+            options.UseNpgsql(psqlConnectionStr));
+        
+        builder.Services.AddSwagger();
+        
         builder.Services.AddScoped<IExtensionsRepository, ExtensionsDbRepository>();
         builder.Services.AddScoped<IExtensionsFilesRepository, ExtensionsFilesFileRepository>(x =>
             new ExtensionsFilesFileRepository(dataDirectory));
