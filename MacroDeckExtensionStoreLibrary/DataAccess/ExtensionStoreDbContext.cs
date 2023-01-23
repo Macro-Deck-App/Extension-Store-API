@@ -1,7 +1,8 @@
+using MacroDeckExtensionStoreLibrary.DataAccess.EntityConfigurations;
 using MacroDeckExtensionStoreLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MacroDeckExtensionStoreLibrary.Data;
+namespace MacroDeckExtensionStoreLibrary.DataAccess;
 
 public class ExtensionStoreDbContext : DbContext
 {
@@ -10,6 +11,12 @@ public class ExtensionStoreDbContext : DbContext
 
     public ExtensionStoreDbContext(DbContextOptions<ExtensionStoreDbContext> options) : base(options)
     {
+    }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new ExtensionEntityConfig());
+        modelBuilder.ApplyConfiguration(new ExtensionFileEntityConfig());
     }
     
 }
