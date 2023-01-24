@@ -13,25 +13,6 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Extensions",
-                columns: table => new
-                {
-                    ExtensionId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PackageId = table.Column<string>(type: "text", nullable: false),
-                    ExtensionType = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Author = table.Column<string>(type: "text", nullable: false),
-                    GitHubRepository = table.Column<string>(type: "text", nullable: false),
-                    DSupportUserId = table.Column<string>(type: "text", nullable: false),
-                    Downloads = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Extensions", x => x.ExtensionId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "md_extensions",
                 columns: table => new
                 {
@@ -42,8 +23,7 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                     extname = table.Column<string>(name: "ext_name", type: "text", nullable: false),
                     extauthor = table.Column<string>(name: "ext_author", type: "text", nullable: false),
                     extgithubrepository = table.Column<string>(name: "ext_github_repository", type: "text", nullable: false),
-                    extdiscordauthoruserid = table.Column<string>(name: "ext_discord_author_userid", type: "text", nullable: false),
-                    extdownloads = table.Column<long>(name: "ext_downloads", type: "bigint", nullable: false, defaultValue: 0L)
+                    extdiscordauthoruserid = table.Column<string>(name: "ext_discord_author_userid", type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -51,30 +31,22 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExtensionFiles",
+                name: "md_extension_downloads",
                 columns: table => new
                 {
-                    ExtensionFileId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Version = table.Column<string>(type: "text", nullable: false),
-                    MinAPIVersion = table.Column<int>(type: "integer", nullable: false),
-                    PackageFileName = table.Column<string>(type: "text", nullable: false),
-                    IconFileName = table.Column<string>(type: "text", nullable: false),
-                    DescriptionHtml = table.Column<string>(type: "text", nullable: false),
-                    MD5Hash = table.Column<string>(type: "text", nullable: false),
-                    LicenseName = table.Column<string>(type: "text", nullable: false),
-                    LicenseUrl = table.Column<string>(type: "text", nullable: false),
-                    UploadDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ExtensionId = table.Column<int>(type: "integer", nullable: true)
+                    exdlid = table.Column<int>(name: "exdl_id", type: "integer", nullable: false),
+                    exdlversion = table.Column<string>(name: "exdl_version", type: "text", nullable: false),
+                    exdltime = table.Column<DateTime>(name: "exdl_time", type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ExtensionFiles", x => x.ExtensionFileId);
+                    table.PrimaryKey("PK_md_extension_downloads", x => x.exdlid);
                     table.ForeignKey(
-                        name: "FK_ExtensionFiles_Extensions_ExtensionId",
-                        column: x => x.ExtensionId,
-                        principalTable: "Extensions",
-                        principalColumn: "ExtensionId");
+                        name: "FK_md_extension_downloads_md_extensions_exdl_id",
+                        column: x => x.exdlid,
+                        principalTable: "md_extensions",
+                        principalColumn: "ext_id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -102,24 +74,16 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         principalColumn: "ext_id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ExtensionFiles_ExtensionId",
-                table: "ExtensionFiles",
-                column: "ExtensionId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ExtensionFiles");
+                name: "md_extension_downloads");
 
             migrationBuilder.DropTable(
                 name: "md_extension_files");
-
-            migrationBuilder.DropTable(
-                name: "Extensions");
 
             migrationBuilder.DropTable(
                 name: "md_extensions");
