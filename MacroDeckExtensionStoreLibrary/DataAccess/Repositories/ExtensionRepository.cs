@@ -19,8 +19,7 @@ public class ExtensionRepository : IExtensionRepository
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         var exist = await context.ExtensionEntities.AsNoTracking()
-            .AnyAsync(x => x.PackageId.Equals(packageId,
-                StringComparison.OrdinalIgnoreCase));
+            .AnyAsync(x => x.PackageId == packageId);
         return exist;
     }
 
@@ -37,8 +36,7 @@ public class ExtensionRepository : IExtensionRepository
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         var extensionEntity = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads)
-            .FirstOrDefaultAsync(x => x.PackageId.Equals(packageId,
-                StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefaultAsync(x => x.PackageId == packageId);
         return extensionEntity;
     }
 
@@ -76,8 +74,7 @@ public class ExtensionRepository : IExtensionRepository
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         var extensionEntity = await context.ExtensionEntities.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.PackageId.Equals(packageId,
-                StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefaultAsync(x => x.PackageId == packageId);
         if (extensionEntity == null)
         {
             return;
@@ -108,8 +105,7 @@ public class ExtensionRepository : IExtensionRepository
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         var extensionEntity = await context.ExtensionEntities.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.PackageId.Equals(packageId,
-                StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefaultAsync(x => x.PackageId == packageId);
         if (extensionEntity == null)
         {
             return;

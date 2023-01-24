@@ -49,8 +49,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         if (version.ToLower() == "latest")
         {
             var latestExtensionFileEntity = await context.ExtensionFileEntities.Include(x => x.ExtensionEntity).AsNoTracking()
-                .Where(x => x.ExtensionEntity.PackageId.Equals(packageId,
-                StringComparison.OrdinalIgnoreCase) &&
+                .Where(x => x.ExtensionEntity.PackageId == packageId &&
                             (!targetApiVersion.HasValue || x.MinApiVersion <= targetApiVersion))
                 .OrderBy(x => x.UploadDateTime)
                 .FirstAsync();
@@ -58,8 +57,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         }
 
         var extensionFileEntity = await context.ExtensionFileEntities.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.ExtensionEntity.PackageId.Equals(packageId,
-                StringComparison.OrdinalIgnoreCase) &&
+            .FirstOrDefaultAsync(x => x.ExtensionEntity.PackageId == packageId &&
                                       x.MinApiVersion <= targetApiVersion && x.Version == version);
         
         return extensionFileEntity;
@@ -70,8 +68,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         var exists = await context.ExtensionFileEntities.AsNoTracking().Include(x => x.ExtensionEntity).AnyAsync(x =>
-            x.ExtensionEntity.PackageId.Equals(packageId,
-                StringComparison.OrdinalIgnoreCase) && x.Version == extensionFileEntity.Version);
+            x.ExtensionEntity.PackageId == packageId && x.Version == extensionFileEntity.Version);
         if (exists)
         {
             await UpdateFileAsync(packageId, extensionFileEntity);
@@ -89,8 +86,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         var extensionFileEntity = await context.ExtensionFileEntities.AsNoTracking()
             .Include(x => x.ExtensionEntity)
             .FirstOrDefaultAsync(x =>
-            x.ExtensionEntity.PackageId.Equals(packageId,
-                StringComparison.OrdinalIgnoreCase) && x.Version == version);
+            x.ExtensionEntity.PackageId == packageId && x.Version == version);
         if (extensionFileEntity == null)
         {
             return;
