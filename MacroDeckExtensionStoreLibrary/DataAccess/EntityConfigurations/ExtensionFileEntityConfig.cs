@@ -14,8 +14,7 @@ public class ExtensionFileEntityConfig : IEntityTypeConfiguration<ExtensionFileE
         builder.ToTable(TablePrefix + "extension_files");
         builder.HasKey(e => e.ExtensionFileId);
         builder.Property(p => p.ExtensionFileId)
-            .HasColumnName(ColumnPrefix + "id")
-            .IsRequired();
+            .HasColumnName(ColumnPrefix + "id");
         builder.Property(p => p.Version)
             .HasColumnName(ColumnPrefix + "version")
             .IsRequired();

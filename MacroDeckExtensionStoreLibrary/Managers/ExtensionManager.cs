@@ -13,11 +13,15 @@ public class ExtensionManager : IExtensionManager
 {
     private readonly ILogger _logger = Log.ForContext<ExtensionManager>();
     private readonly IExtensionRepository _extensionRepository;
+    private readonly IExtensionFileRepository _extensionFileRepository;
     private readonly IMapper _mapper;
 
-    public ExtensionManager(IExtensionRepository extensionRepository, IMapper mapper)
+    public ExtensionManager(IExtensionRepository extensionRepository,
+        IExtensionFileRepository extensionFileRepository,
+        IMapper mapper)
     {
         _extensionRepository = extensionRepository;
+        _extensionFileRepository = extensionFileRepository;
         _mapper = mapper;
     }
 
@@ -44,6 +48,12 @@ public class ExtensionManager : IExtensionManager
         return extension;
     }
 
+    public async Task<bool> ExistsAsync(string packageId)
+    {
+        var exists = await _extensionRepository.ExistAsync(packageId);
+        return exists;
+    }
+
     public async Task<ExtensionSummary[]> SearchAsync(string query)
     {
         if (query.Length < 3)
@@ -65,10 +75,11 @@ public class ExtensionManager : IExtensionManager
         {
             var extensionEntity = _mapper.Map<ExtensionEntity>(extension);
             await _extensionRepository.CreateExtensionAsync(extensionEntity);
+            _logger.Information("Created extension {PackageId}", extension.PackageId);
         }
         catch (Exception ex)
         {
-            _logger.Fatal(ex, "Failed to create extension");
+            _logger.Fatal(ex, "Failed to create extension {PackageId}", extension.PackageId);
         }
     }
 
@@ -80,7 +91,59 @@ public class ExtensionManager : IExtensionManager
         }
         catch (Exception ex)
         {
-            _logger.Fatal(ex, "Failed to delete extension - packageId {PackageId}", packageId);
+            _logger.Fatal(ex, "Failed to delete extension {PackageId}", packageId);
         }
+    }
+
+    public async Task<FileStream?> GetIconStreamAsync(string packageId)
+    {
+        var extensionFile = await _extensionFileRepository.GetFileAsync(packageId);
+        if (extensionFile == null)
+        {
+            return null;
+        }
+        var iconPath = Path.Combine(Paths.DataDirectory, extensionFile.IconFileName);
+        if (!File.Exists(iconPath))
+        {
+            _logger.Fatal("Icon file for {PackageId} does not exist", packageId);
+            return null;
+        }
+
+        try
+        {
+
+            var iconFileStream = File.Open(iconPath, FileMode.Open, FileAccess.Read, FileShare.None);
+            iconFileStream.Seek(0, SeekOrigin.Begin);
+            return iconFileStream;
+        }
+        catch (Exception ex)
+        {
+            _logger.Fatal(ex, "Cannot open icon for {PackageId}", packageId);
+        }
+
+        return null;
+    }
+
+    public async Task CountDownloadAsync(string packageId, string version)
+    {
+        await _extensionRepository.CountDownloadAsync(packageId, version);
+    }
+
+    public async Task<long> GetDownloadCountAsync(string packageId)
+    {
+        var count = await _extensionRepository.GetDownloadCountAsync(packageId);
+        return count;
+    }
+
+    public async Task<ExtensionDownloadInfo[]> GetDownloadsAsync(string packageId, DateOnly? startDate = null, DateOnly? endDate = null)
+    {
+        var downloadInfoEntities = await _extensionRepository.GetDownloadsAsync(packageId, startDate, endDate);
+        if (downloadInfoEntities.Length == 0)
+        {
+            return Array.Empty<ExtensionDownloadInfo>();
+        }
+
+        var downloadInfos = _mapper.Map<ExtensionDownloadInfo[]>(downloadInfoEntities);
+        return downloadInfos;
     }
 }

@@ -1,42 +1,53 @@
 using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckExtensionStoreLibrary.DataAccess.Repositories;
 
 public class ExtensionRepository : IExtensionRepository
 {
-    private readonly ExtensionStoreDbContext _context;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public ExtensionRepository(ExtensionStoreDbContext context)
+    public ExtensionRepository(IServiceScopeFactory serviceScopeFactory)
     {
-        _context = context;
-        _context.Database.EnsureCreated();
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task<bool> ExistAsync(string packageId)
     {
-        var exist = await _context.ExtensionEntities.AsNoTracking().AnyAsync(x => x.PackageId == packageId);
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var exist = await context.ExtensionEntities.AsNoTracking()
+            .AnyAsync(x => x.PackageId.Equals(packageId,
+                StringComparison.OrdinalIgnoreCase));
         return exist;
     }
 
     public async Task<ExtensionEntity[]> GetExtensionsAsync()
     {
-        var extensionEntities = await _context.ExtensionEntities.AsNoTracking().ToArrayAsync();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var extensionEntities = await context.ExtensionEntities.AsNoTracking().ToArrayAsync();
         return extensionEntities;
     }
 
     public async Task<ExtensionEntity?> GetByPackageIdAsync(string packageId)
     {
-        var extensionEntity = await _context.ExtensionEntities.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.PackageId == packageId);
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var extensionEntity = await context.ExtensionEntities.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.PackageId.Equals(packageId,
+                StringComparison.OrdinalIgnoreCase));
         return extensionEntity;
     }
 
     public async Task<ExtensionEntity[]> SearchAsync(string query)
     {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         query = query.ToLower().Trim();
-        var matches = await _context.ExtensionEntities.AsNoTracking().Where(x => 
+        var matches = await context.ExtensionEntities.AsNoTracking().Where(x => 
                                                             x.PackageId.ToLower().Contains(query) ||
                                                             x.Name.ToLower().Contains(query) ||
                                                             x.Author.ToLower().Contains(query) ||
@@ -46,7 +57,9 @@ public class ExtensionRepository : IExtensionRepository
 
     public async Task CreateExtensionAsync(ExtensionEntity extensionEntity)
     {
-        var exists = await _context.ExtensionEntities.AsNoTracking()
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var exists = await context.ExtensionEntities.AsNoTracking()
             .AnyAsync(x => x.PackageId == extensionEntity.PackageId);
         if (exists)
         {
@@ -54,26 +67,31 @@ public class ExtensionRepository : IExtensionRepository
             return;
         }
 
-        await _context.ExtensionEntities.AddAsync(extensionEntity);
-        await _context.SaveChangesAsync();
+        await context.ExtensionEntities.AddAsync(extensionEntity);
+        await context.SaveChangesAsync();
     }
 
     public async Task DeleteExtensionAsync(string packageId)
     {
-        var extensionEntity = await _context.ExtensionEntities.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.PackageId == packageId);
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var extensionEntity = await context.ExtensionEntities.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.PackageId.Equals(packageId,
+                StringComparison.OrdinalIgnoreCase));
         if (extensionEntity == null)
         {
             return;
         }
 
-        _context.ExtensionEntities.Remove(extensionEntity);
-        await _context.SaveChangesAsync();
+        context.ExtensionEntities.Remove(extensionEntity);
+        await context.SaveChangesAsync();
     }
 
     public async Task UpdateExtensionAsync(ExtensionEntity extensionEntity)
     {
-        var exists = await _context.ExtensionEntities.AsNoTracking()
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var exists = await context.ExtensionEntities.AsNoTracking()
             .AnyAsync(x => x.PackageId == extensionEntity.PackageId);
         if (!exists)
         {
@@ -81,17 +99,51 @@ public class ExtensionRepository : IExtensionRepository
             return;
         }
         
-        _context.Entry(extensionEntity).CurrentValues.SetValues(extensionEntity);
-        await _context.SaveChangesAsync();
+        context.Entry(extensionEntity).CurrentValues.SetValues(extensionEntity);
+        await context.SaveChangesAsync();
     }
 
-    public async Task CountDownloadAsync(string packageId)
+    public async Task CountDownloadAsync(string packageId, string version)
     {
-        var extensionEntity = await _context.ExtensionEntities.FirstOrDefaultAsync(x => x.PackageId == packageId);
-        if (extensionEntity != null)
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var extensionEntity = await context.ExtensionEntities.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.PackageId.Equals(packageId,
+                StringComparison.OrdinalIgnoreCase));
+        if (extensionEntity == null)
         {
-            extensionEntity.Downloads += 1;
-            await _context.SaveChangesAsync();
+            return;
         }
+        var extensionDownloadInfoEntity = new ExtensionDownloadInfoEntity
+        {
+            ExtensionEntity = extensionEntity,
+            DownloadedVersion = version,
+            DownloadDateTime = DateTime.Now
+        };
+        await context.ExtensionDownloadInfoEntities.AddAsync(extensionDownloadInfoEntity);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<long> GetDownloadCountAsync(string packageId)
+    {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var count = await context.ExtensionDownloadInfoEntities.AsNoTracking().Include(x => x.ExtensionEntity)
+            .CountAsync(x => x.ExtensionEntity.PackageId == packageId);
+        return count;
+    }
+
+    public async Task<ExtensionDownloadInfoEntity[]> GetDownloadsAsync(string packageId, DateOnly? startDate = null,
+        DateOnly? endDate = null)
+    {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var startDateTime = startDate?.ToDateTime(default);
+        var endDateTime = endDate?.ToDateTime(default);
+        var downloads = await context.ExtensionDownloadInfoEntities.AsNoTracking().Include(x => x.ExtensionEntity)
+            .Where(x => (!startDate.HasValue || x.DownloadDateTime >= startDateTime) 
+                        && (!endDateTime.HasValue || x.DownloadDateTime <= endDateTime)).ToArrayAsync();
+        
+        return downloads;
     }
 }

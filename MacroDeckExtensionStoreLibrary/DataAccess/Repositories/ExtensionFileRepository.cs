@@ -2,30 +2,35 @@ using JetBrains.Annotations;
 using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckExtensionStoreLibrary.DataAccess.Repositories;
 
 [UsedImplicitly]
 public class ExtensionFileRepository : IExtensionFileRepository
 {
-    private readonly ExtensionStoreDbContext _context;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public ExtensionFileRepository(ExtensionStoreDbContext context)
+    public ExtensionFileRepository(IServiceScopeFactory serviceScopeFactory)
     {
-        _context = context;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task<bool> ExistAsync(string packageId, string version)
     {
-        var exist = await _context.ExtensionFileEntities.AsNoTracking().Include(x => x.ExtensionEntity)
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var exist = await context.ExtensionFileEntities.AsNoTracking().Include(x => x.ExtensionEntity)
             .AnyAsync(x => x.Version == version);
         return exist;
     }
 
-    public async Task<ExtensionFileEntity[]> GetFiles(string packageId)
+    public async Task<ExtensionFileEntity[]> GetFilesAsync(string packageId)
     {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         var extensionEntity =
-            await _context.ExtensionEntities.AsNoTracking()
+            await context.ExtensionEntities.AsNoTracking()
                 .Include(x => x.ExtensionFiles)
                 .FirstOrDefaultAsync(x => x.PackageId == packageId);
         if (extensionEntity == null)
@@ -37,55 +42,65 @@ public class ExtensionFileRepository : IExtensionFileRepository
         return extensionFileEntities;
     }
 
-    public async Task<ExtensionFileEntity?> GetFile(string packageId, int targetApiVersion, string version = "latest")
+    public async Task<ExtensionFileEntity?> GetFileAsync(string packageId, int? targetApiVersion = null, string version = "latest")
     {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         if (version.ToLower() == "latest")
         {
-            var latestExtensionFileEntity = await _context.ExtensionFileEntities.Include(x => x.ExtensionEntity).AsNoTracking()
-                .Where(x => x.ExtensionEntity.PackageId == packageId &&
-                            x.MinApiVersion <= targetApiVersion)
+            var latestExtensionFileEntity = await context.ExtensionFileEntities.Include(x => x.ExtensionEntity).AsNoTracking()
+                .Where(x => x.ExtensionEntity.PackageId.Equals(packageId,
+                StringComparison.OrdinalIgnoreCase) &&
+                            (!targetApiVersion.HasValue || x.MinApiVersion <= targetApiVersion))
                 .OrderBy(x => x.UploadDateTime)
                 .FirstAsync();
             return latestExtensionFileEntity;
         }
 
-        var extensionFileEntity = await _context.ExtensionFileEntities.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.ExtensionEntity.PackageId == packageId &&
+        var extensionFileEntity = await context.ExtensionFileEntities.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.ExtensionEntity.PackageId.Equals(packageId,
+                StringComparison.OrdinalIgnoreCase) &&
                                       x.MinApiVersion <= targetApiVersion && x.Version == version);
         
         return extensionFileEntity;
     }
 
-    public async Task CreateFile(string packageId, ExtensionFileEntity extensionFileEntity)
+    public async Task CreateFileAsync(string packageId, ExtensionFileEntity extensionFileEntity)
     {
-        var exists = await _context.ExtensionFileEntities.AsNoTracking().Include(x => x.ExtensionEntity).AnyAsync(x =>
-            x.ExtensionEntity.PackageId == packageId && x.Version == extensionFileEntity.Version);
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var exists = await context.ExtensionFileEntities.AsNoTracking().Include(x => x.ExtensionEntity).AnyAsync(x =>
+            x.ExtensionEntity.PackageId.Equals(packageId,
+                StringComparison.OrdinalIgnoreCase) && x.Version == extensionFileEntity.Version);
         if (exists)
         {
-            await UpdateFile(packageId, extensionFileEntity);
+            await UpdateFileAsync(packageId, extensionFileEntity);
             return;
         }
 
-        await _context.ExtensionFileEntities.AddAsync(extensionFileEntity);
-        await _context.SaveChangesAsync();
+        await context.ExtensionFileEntities.AddAsync(extensionFileEntity);
+        await context.SaveChangesAsync();
     }
 
-    public async Task DeleteFile(string packageId, string version)
+    public async Task DeleteFileAsync(string packageId, string version)
     {
-        var extensionFileEntity = await _context.ExtensionFileEntities.AsNoTracking()
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var extensionFileEntity = await context.ExtensionFileEntities.AsNoTracking()
             .Include(x => x.ExtensionEntity)
             .FirstOrDefaultAsync(x =>
-            x.ExtensionEntity.PackageId == packageId && x.Version == version);
+            x.ExtensionEntity.PackageId.Equals(packageId,
+                StringComparison.OrdinalIgnoreCase) && x.Version == version);
         if (extensionFileEntity == null)
         {
             return;
         }
 
-        _context.ExtensionFileEntities.Remove(extensionFileEntity);
-        await _context.SaveChangesAsync();
+        context.ExtensionFileEntities.Remove(extensionFileEntity);
+        await context.SaveChangesAsync();
     }
 
-    public Task UpdateFile(string packageId, ExtensionFileEntity extensionFileEntity)
+    public Task UpdateFileAsync(string packageId, ExtensionFileEntity extensionFileEntity)
     {
         throw new NotImplementedException();
     }

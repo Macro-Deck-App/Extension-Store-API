@@ -1,16 +1,15 @@
 using MacroDeckExtensionStoreAPI.Config;
+using MacroDeckExtensionStoreLibrary;
+using MacroDeckExtensionStoreLibrary.Automapper;
 using MacroDeckExtensionStoreLibrary.DataAccess;
-using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.Repositories;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 using MacroDeckExtensionStoreLibrary.Managers;
 using MacroDeckExtensionStoreLibrary.Parsers;
-using MacroDeckExtensionStoreLibrary.Repositories;
 using MacroDeckExtensionStoreLibrary.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 namespace MacroDeckExtensionStoreAPI.Startup;
 
@@ -18,11 +17,14 @@ public static class DependencyInjection
 {
     public static async Task ConfigureAsync(this WebApplicationBuilder builder)
     {
+        builder.ConfigureSerilog();
         Paths.EnsureDirectoriesCreated();
-        var dataDirectory = Paths.DataDirectory;
         
         var appConfig = await AppConfig.LoadAsync(Paths.AppConfigPath);
         builder.Services.AddSingleton(appConfig);
+        
+        builder.Services.AddAutoMapper(typeof(ExtensionProfile));
+        builder.Services.AddAutoMapper(typeof(ExtensionFileProfile));
         
         var databaseConfig = await DatabaseConfig.LoadAsync(Paths.DatabaseConfigPath);
         var psqlConnectionStr = databaseConfig.ToConnectionString();
@@ -30,8 +32,9 @@ public static class DependencyInjection
             options.UseNpgsql(psqlConnectionStr));
         
         builder.Services.AddScoped<IExtensionRepository, ExtensionRepository>();
-        builder.Services.AddScoped<IExtensionManager, ExtensionManager>();
         builder.Services.AddScoped<IExtensionFileRepository, ExtensionFileRepository>();
+        builder.Services.AddScoped<IExtensionManager, ExtensionManager>();
+        builder.Services.AddScoped<IExtensionFileManager, ExtensionFileManager>();
 
         builder.Services.AddScoped<IGitHubRepositoryLicenseUrlParser, GitHubRepositoryLicenseUrlParser>();
         builder.Services.AddScoped<IGitHubRepositoryService, GitHubRepositoryService>();

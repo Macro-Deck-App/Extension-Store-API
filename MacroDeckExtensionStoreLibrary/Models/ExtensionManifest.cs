@@ -17,6 +17,9 @@ public class ExtensionManifest
      [JsonPropertyName("author")]
      public string Author { get; set; }
 
+     [JsonPropertyName("author-discord-userid")]
+     public string AuthorDiscordUserId { get; set; }
+
      [JsonPropertyName("repository")]
      public string Repository { get; set; } = "";
 

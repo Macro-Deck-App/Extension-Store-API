@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MacroDeckExtensionStoreLibrary.Migrations
 {
     [DbContext(typeof(ExtensionStoreDbContext))]
-    [Migration("20230123111515_Initial")]
+    [Migration("20230124111348_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,26 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("MacroDeckExtensionStoreLibrary.DataAccess.Entities.ExtensionDownloadInfoEntity", b =>
+                {
+                    b.Property<int>("ExtensionDownloadId")
+                        .HasColumnType("integer")
+                        .HasColumnName("exdl_id");
+
+                    b.Property<DateTime>("DownloadDateTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("exdl_time");
+
+                    b.Property<string>("DownloadedVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("exdl_version");
+
+                    b.HasKey("ExtensionDownloadId");
+
+                    b.ToTable("md_extension_downloads", (string)null);
+                });
 
             modelBuilder.Entity("MacroDeckExtensionStoreLibrary.DataAccess.Entities.ExtensionEntity", b =>
                 {
@@ -43,12 +63,6 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("ext_discord_author_userid");
-
-                    b.Property<long>("Downloads")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
-                        .HasColumnName("ext_downloads");
 
                     b.Property<int>("ExtensionType")
                         .HasColumnType("integer")
@@ -104,7 +118,7 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         .HasColumnType("text")
                         .HasColumnName("extfl_md5_hash");
 
-                    b.Property<int>("MinAPIVersion")
+                    b.Property<int>("MinApiVersion")
                         .HasColumnType("integer")
                         .HasColumnName("extfl_min_api_version");
 
@@ -127,95 +141,15 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                     b.ToTable("md_extension_files", (string)null);
                 });
 
-            modelBuilder.Entity("MacroDeckExtensionStoreLibrary.Models.Extension", b =>
+            modelBuilder.Entity("MacroDeckExtensionStoreLibrary.DataAccess.Entities.ExtensionDownloadInfoEntity", b =>
                 {
-                    b.Property<int>("ExtensionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                    b.HasOne("MacroDeckExtensionStoreLibrary.DataAccess.Entities.ExtensionEntity", "ExtensionEntity")
+                        .WithMany("Downloads")
+                        .HasForeignKey("ExtensionDownloadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ExtensionId"));
-
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DSupportUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("Downloads")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("ExtensionType")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("GitHubRepository")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PackageId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ExtensionId");
-
-                    b.ToTable("Extensions");
-                });
-
-            modelBuilder.Entity("MacroDeckExtensionStoreLibrary.Models.ExtensionFile", b =>
-                {
-                    b.Property<int>("ExtensionFileId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ExtensionFileId"));
-
-                    b.Property<string>("DescriptionHtml")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("ExtensionId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("IconFileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LicenseName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LicenseUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("MD5Hash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("MinAPIVersion")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("PackageFileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UploadDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ExtensionFileId");
-
-                    b.HasIndex("ExtensionId");
-
-                    b.ToTable("ExtensionFiles");
+                    b.Navigation("ExtensionEntity");
                 });
 
             modelBuilder.Entity("MacroDeckExtensionStoreLibrary.DataAccess.Entities.ExtensionFileEntity", b =>
@@ -229,20 +163,10 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                     b.Navigation("ExtensionEntity");
                 });
 
-            modelBuilder.Entity("MacroDeckExtensionStoreLibrary.Models.ExtensionFile", b =>
-                {
-                    b.HasOne("MacroDeckExtensionStoreLibrary.Models.Extension", null)
-                        .WithMany("ExtensionFiles")
-                        .HasForeignKey("ExtensionId");
-                });
-
             modelBuilder.Entity("MacroDeckExtensionStoreLibrary.DataAccess.Entities.ExtensionEntity", b =>
                 {
-                    b.Navigation("ExtensionFiles");
-                });
+                    b.Navigation("Downloads");
 
-            modelBuilder.Entity("MacroDeckExtensionStoreLibrary.Models.Extension", b =>
-                {
                     b.Navigation("ExtensionFiles");
                 });
 #pragma warning restore 612, 618

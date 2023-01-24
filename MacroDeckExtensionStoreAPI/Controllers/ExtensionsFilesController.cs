@@ -1,82 +1,80 @@
-using AutoMapper;
 using MacroDeckExtensionStoreAPI.Authentication;
-using MacroDeckExtensionStoreLibrary.Exceptions;
-using MacroDeckExtensionStoreLibrary.Interfaces;
+using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace MacroDeckExtensionStoreAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("extensions/files")]
 public class ExtensionsFilesController : ControllerBase
 {
-    private readonly ILogger<ExtensionsFilesController> _logger;
-    private readonly IExtensionsRepository _extensionsRepository;
-    private readonly IExtensionsFilesRepository _extensionsFilesRepository;
-    private readonly IGitHubRepositoryService _gitHubRepositoryService;
-    private readonly IMapper _mapper;
+    private readonly IExtensionFileManager _extensionFileManager;
+    private readonly IExtensionManager _extensionManager;
+    private readonly ILogger _logger = Log.ForContext<ExtensionsFilesController>();
 
-    public ExtensionsFilesController(ILogger<ExtensionsFilesController> logger,
-        IExtensionsRepository extensionsRepository,
-        IExtensionsFilesRepository extensionsFilesRepository,
-        IGitHubRepositoryService gitHubRepositoryService,
-        IMapper mapper)
+    public ExtensionsFilesController(IExtensionFileManager extensionFileManager, IExtensionManager extensionManager)
     {
-        _logger = logger;
-        _extensionsRepository = extensionsRepository;
-        _extensionsFilesRepository = extensionsFilesRepository;
-        _gitHubRepositoryService = gitHubRepositoryService;
-        _mapper = mapper;
+        _extensionFileManager = extensionFileManager;
+        _extensionManager = extensionManager;
     }
     
     [HttpGet("{packageId}")]
-    public async Task<ExtensionFile[]> GetExtensionFilesAsync(string packageId)
+    public async Task<ActionResult<ExtensionFile[]>> GetExtensionFilesAsync(string packageId)
     {
-        return await _extensionsRepository.GetExtensionFilesAsync(packageId);
+        var extensionFiles = await _extensionFileManager.GetFilesAsync(packageId);
+        if (extensionFiles == null)
+        {
+            return NotFound("PackageId not found");
+        }
+
+        return Ok(extensionFiles);
     }
 
     [HttpGet("{packageId}@{version}")]
-    public async Task<IActionResult> GetExtensionFileAsync(string packageId, string version, int apiVersion = 3000)
+    public async Task<ActionResult<ExtensionFile>> GetExtensionFileAsync(string packageId, string version, int? apiVersion = null)
     {
-        var extensionFile = await _extensionsRepository.GetExtensionFileAsync(packageId, apiVersion, version);
+        var extensionFile = await _extensionFileManager.GetFileAsync(packageId, apiVersion, version);
         if (extensionFile == null)
         {
-            return NotFound("Version not found");
+            return NotFound("PackageId or version not found");
         }
         return Ok(extensionFile);
     }
 
     [HttpGet("Download/{packageId}@{version}")]
-    public async Task<IActionResult> DownloadExtensionFileAsync(string packageId, string version, int apiVersion = 3000)
+    public async Task<ActionResult<byte[]>> DownloadExtensionFileAsync(string packageId, string version, int apiVersion = 3000)
     {
-        var extensionFile = await _extensionsRepository.GetExtensionFileAsync(packageId, apiVersion, version);
-        if (extensionFile == null)
-        {
-            return NotFound("Version not found");
-        }
-
-        var bytes = await _extensionsFilesRepository.GetExtensionFileBytesAsync(extensionFile);
-        if (bytes == null)
+        var fileBytes = await _extensionFileManager.GetFileBytesAsync(packageId, version);
+        if (fileBytes == null)
         {
             return NotFound("File not found");
         }
 
-        var fileName = $"{packageId}_{version}.macroDeckExtension";
+        await _extensionManager.CountDownloadAsync(packageId, version);
 
-        await _extensionsRepository.CountDownloadAsync(packageId);
+        var fileName = $"{packageId.ToLower()}_{version.ToLower()}.macroDeckExtension";
         
-        return File(bytes, "application/zip", fileName);
+        return File(fileBytes, "application/zip", fileName);
     }
 
     [HttpPost("Upload")]
     [ApiKey]
     public async Task<ActionResult<ExtensionFile>> PostUploadExtensionFileAsync(IFormFile file)
     {
-        ExtensionFile? extensionFile = null;
+        await using var stream = file.OpenReadStream();
+        var extensionFile = await _extensionFileManager.CreateFileAsync(stream);
+        if (extensionFile == null)
+        {
+            return StatusCode(500);
+        }
+
+        return Created("",extensionFile);
+        /*
         try
         {
-            await using var stream = file.OpenReadStream();
             var result = await _extensionsFilesRepository.SaveExtensionFileFromStreamAsync(stream);
             var license = await _gitHubRepositoryService.GetLicenseAsync(result.ExtensionManifest.Repository);
             var descriptionHtml = await _gitHubRepositoryService.GetReadmeAsync(result.ExtensionManifest.Repository);
@@ -105,5 +103,6 @@ public class ExtensionsFilesController : ControllerBase
             _logger.LogError(ex.Message);
             return StatusCode(500);
         }
+        */
     }
 }

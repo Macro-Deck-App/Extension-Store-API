@@ -1,5 +1,5 @@
 using MacroDeckExtensionStoreAPI.Authentication;
-using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
+using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
@@ -8,32 +8,37 @@ using ILogger = Serilog.ILogger;
 namespace MacroDeckExtensionStoreAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("extensions")]
 public class ExtensionsController : ControllerBase
 {
+    private readonly IExtensionManager _extensionManager;
     private readonly ILogger _logger = Log.ForContext<ExtensionsController>();
     
-    private readonly IExtensionRepository _extensionRepository;
-    private readonly IExtensionFileRepository _extensionFileRepository;
-
-    public ExtensionsController(IExtensionRepository extensionRepository,
-        IExtensionFileRepository extensionFileRepository)
+    public ExtensionsController(IExtensionManager extensionManager)
     {
-        _extensionRepository = extensionRepository;
-        _extensionFileRepository = extensionFileRepository;
+        _extensionManager = extensionManager;
     }
 
 
     [HttpGet]
-    public async Task<Extension[]> GetExtensionsAsync()
+    public async Task<ActionResult<ExtensionSummary[]>> GetExtensionsAsync()
     {
-        return await _extensionsRepository.GetExtensionsAsync();
+        try
+        {
+            var extensions = await _extensionManager.GetExtensionsAsync();
+            return Ok(extensions);
+        }
+        catch (Exception ex)
+        {
+            _logger.Fatal(ex, "Cannot return extensions");
+            return NoContent();
+        }
     }
 
     [HttpGet("{packageId}")]
-    public async Task<IActionResult> GetExtensionByPackageIdAsync(string packageId)
+    public async Task<ActionResult<Extension>> GetExtensionByPackageIdAsync(string packageId)
     {
-        var extension = await _extensionsRepository.GetExtensionByPackageIdAsync(packageId);
+        var extension = await _extensionManager.GetByPackageIdAsync(packageId);
         if (extension == null)
         {
             return NotFound("Package Id not found");
@@ -41,49 +46,24 @@ public class ExtensionsController : ControllerBase
         return Ok(extension);
     }
 
-    [HttpGet("Icon/{packageId}")]
-    public async Task<IActionResult> GetIconAsync(string packageId)
+    [HttpGet("icon/{packageId}")]
+    public async Task<ActionResult<FileStream>> GetIconAsync(string packageId)
     {
-        var extensionFiles = await _extensionsRepository.GetExtensionFilesAsync(packageId);
-        if (extensionFiles.Length == 0)
+        await using var iconFileStream = await _extensionManager.GetIconStreamAsync(packageId);
+        if (iconFileStream == null)
         {
-            return NotFound("Package Id does not exist or does not contain any files yet.");
+            return NotFound("Icon not found");
         }
-        var latestExtensionFile = extensionFiles.OrderBy(x => x.UploadDateTime).First();
-        var iconPath = Path.Combine(_extensionsFilesRepository.ExtensionsPath, latestExtensionFile.IconFileName);
-        if (!System.IO.File.Exists(iconPath))
-        {
-            return NotFound("No icon file found");
-        }
-
-        var iconFileStream = System.IO.File.Open(iconPath, FileMode.Open, FileAccess.Read, FileShare.None);
-        iconFileStream.Seek(0, SeekOrigin.Begin);
 
         return File(iconFileStream, "image/jpg");
     }
     
-
     [HttpPost]
     [ApiKey]
     public async Task<IActionResult> PostExtensionAsync(Extension extension)
     {
-        await _extensionsRepository.AddExtensionAsync(extension);
+        await _extensionManager.CreateAsync(extension);
         return Ok(extension);
     }
 
-    [HttpPut]
-    [ApiKey]
-    public async Task<IActionResult> PutExtensionAsync(Extension extension)
-    {
-        try
-        {
-            await _extensionsRepository.UpdateExtensionAsync(extension);
-            return Ok(extension);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound("Package Id not found");
-        }
-    }
-    
 }
