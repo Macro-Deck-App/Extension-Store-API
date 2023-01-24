@@ -28,7 +28,7 @@ public class ExtensionRepository : IExtensionRepository
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
-        var extensionEntities = await context.ExtensionEntities.AsNoTracking().ToArrayAsync();
+        var extensionEntities = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).ToArrayAsync();
         return extensionEntities;
     }
 
@@ -36,7 +36,7 @@ public class ExtensionRepository : IExtensionRepository
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
-        var extensionEntity = await context.ExtensionEntities.AsNoTracking()
+        var extensionEntity = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads)
             .FirstOrDefaultAsync(x => x.PackageId.Equals(packageId,
                 StringComparison.OrdinalIgnoreCase));
         return extensionEntity;
@@ -47,7 +47,7 @@ public class ExtensionRepository : IExtensionRepository
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         query = query.ToLower().Trim();
-        var matches = await context.ExtensionEntities.AsNoTracking().Where(x => 
+        var matches = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(x => 
                                                             x.PackageId.ToLower().Contains(query) ||
                                                             x.Name.ToLower().Contains(query) ||
                                                             x.Author.ToLower().Contains(query) ||

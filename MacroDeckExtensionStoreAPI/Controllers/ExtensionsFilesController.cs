@@ -62,47 +62,19 @@ public class ExtensionsFilesController : ControllerBase
 
     [HttpPost("Upload")]
     [ApiKey]
-    public async Task<ActionResult<ExtensionFile>> PostUploadExtensionFileAsync(IFormFile file)
+    public async Task<ActionResult<ExtensionFileUploadResult>> PostUploadExtensionFileAsync(IFormFile file)
     {
         await using var stream = file.OpenReadStream();
-        var extensionFile = await _extensionFileManager.CreateFileAsync(stream);
-        if (extensionFile == null)
+        var result = await _extensionFileManager.CreateFileAsync(stream);
+        if (result == null)
         {
             return StatusCode(500);
         }
 
-        return Created("",extensionFile);
-        /*
-        try
-        {
-            var result = await _extensionsFilesRepository.SaveExtensionFileFromStreamAsync(stream);
-            var license = await _gitHubRepositoryService.GetLicenseAsync(result.ExtensionManifest.Repository);
-            var descriptionHtml = await _gitHubRepositoryService.GetReadmeAsync(result.ExtensionManifest.Repository);
-            extensionFile = _mapper.Map<ExtensionFile>(result);
-            extensionFile.LicenseName = license.Name;
-            extensionFile.LicenseUrl = license.Url;
-            extensionFile.DescriptionHtml = descriptionHtml;
-            await _extensionsRepository.AddExtensionFileAsync(result.ExtensionManifest.PackageId, extensionFile);
-
-            return Ok(result);
-        }
-        catch (VersionAlreadyExistException)
-        {
-            if (extensionFile != null)
-                await _extensionsFilesRepository.DeleteExtensionFileAsync(extensionFile);
-            return Conflict("Version already exists");
-        }
-        catch (PackageIdNotFoundException)
-        {
-            if (extensionFile != null)
-                await _extensionsFilesRepository.DeleteExtensionFileAsync(extensionFile);
-            return NotFound("Package Id not found");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            return StatusCode(500);
-        }
-        */
+        return !result.Success
+            ? Problem(result.ErrorMessage,
+                statusCode: 500)
+            : Created(result.ExtensionManifest.PackageId,
+                result);
     }
 }
