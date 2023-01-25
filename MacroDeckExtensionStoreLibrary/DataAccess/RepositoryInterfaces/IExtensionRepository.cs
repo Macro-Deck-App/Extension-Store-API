@@ -11,6 +11,7 @@ public interface IExtensionRepository
     public Task CreateExtensionAsync(ExtensionEntity extensionEntity);
     public Task DeleteExtensionAsync(string packageId);
     public Task UpdateExtensionAsync(ExtensionEntity extensionEntity);
+    public Task UpdateDescription(string packageId, string description);
     public Task CountDownloadAsync(string packageId, string version);
     public Task<long> GetDownloadCountAsync(string packageId);
     public Task<ExtensionDownloadInfoEntity[]> GetDownloadsAsync(string packageId, DateOnly? startDate = null, DateOnly? endDate = null);

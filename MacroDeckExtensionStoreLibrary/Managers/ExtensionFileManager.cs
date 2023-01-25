@@ -19,16 +19,19 @@ public class ExtensionFileManager : IExtensionFileManager
     private readonly IExtensionFileRepository _extensionFileRepository;
     private readonly IExtensionManager _extensionManager;
     private readonly IGitHubRepositoryService _gitHubRepositoryService;
+    private readonly IExtensionRepository _extensionRepository;
     private readonly IMapper _mapper;
 
     public ExtensionFileManager(IExtensionFileRepository extensionFileRepository,
         IExtensionManager extensionManager,
         IGitHubRepositoryService gitHubRepositoryService,
+        IExtensionRepository extensionRepository,
         IMapper mapper)
     {
         _extensionFileRepository = extensionFileRepository;
         _extensionManager = extensionManager;
         _gitHubRepositoryService = gitHubRepositoryService;
+        _extensionRepository = extensionRepository;
         _mapper = mapper;
     }
     
@@ -133,16 +136,6 @@ public class ExtensionFileManager : IExtensionFileManager
         }
 
         var md5 = await MD5Util.GetMD5HashAsync(finalPackageFilePath);
-        
-        try
-        {
-            File.Delete(tmpFilePath);
-        }
-        catch (Exception ex)
-        {
-            _logger.Warning(ex, "Cannot delete temp files for {PackageId}", extensionManifest.PackageId);
-        }
-
         var readmeHtml = "";
         var description = "";
         var license = new GitHubLicense();
@@ -171,6 +164,15 @@ public class ExtensionFileManager : IExtensionFileManager
         {
             _logger.Warning(ex, "Cannot get license of {PackageId}", extensionManifest.PackageId);
         }
+        
+        try
+        {
+            File.Delete(tmpFilePath);
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Cannot delete temp files for {PackageId}", extensionManifest.PackageId);
+        }
 
         result.Success = true;
         result.ExtensionManifest = extensionManifest;
@@ -185,6 +187,7 @@ public class ExtensionFileManager : IExtensionFileManager
         var extensionFileEntity = _mapper.Map<ExtensionFileEntity>(result);
 
         await _extensionFileRepository.CreateFileAsync(extensionManifest.PackageId, extensionFileEntity);
+        await _extensionRepository.UpdateDescription(extensionManifest.PackageId, description);
 
         return result;
     }
