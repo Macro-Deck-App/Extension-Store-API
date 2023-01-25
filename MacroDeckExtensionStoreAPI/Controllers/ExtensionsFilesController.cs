@@ -51,6 +51,8 @@ public class ExtensionsFilesController : ControllerBase
     }
 
     [HttpPost("Upload")]
+    [RequestFormLimits(MultipartBodyLengthLimit = 209715200)]
+    [RequestSizeLimit(209715200)]
     [ApiKey]
     public async Task<ActionResult<ExtensionFileUploadResult>> PostUploadExtensionFileAsync(IFormFile file)
     {

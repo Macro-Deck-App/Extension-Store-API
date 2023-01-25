@@ -1,6 +1,8 @@
 using JetBrains.Annotations;
 using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
+using MacroDeckExtensionStoreLibrary.Enums;
+using MacroDeckExtensionStoreLibrary.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -71,7 +73,8 @@ public class ExtensionFileRepository : IExtensionFileRepository
             x.ExtensionEntity.PackageId == packageId && x.Version == extensionFileEntity.Version);
         if (exists)
         {
-            await UpdateFileAsync(packageId, extensionFileEntity);
+            throw new ErrorCodeException(400, $"A file with this version for the package Id {packageId} already exists",
+                ErrorCode.VersionAlreadyExists);
             return;
         }
 
@@ -79,7 +82,8 @@ public class ExtensionFileRepository : IExtensionFileRepository
             await context.ExtensionEntities.AsNoTracking().FirstOrDefaultAsync(x => x.PackageId == packageId);
         if (extensionEntity == null)
         {
-            return;
+            throw new ErrorCodeException(400, $"Extension with package Id {packageId} does not exist",
+                ErrorCode.PackageIdNotFound);
         }
         extensionFileEntity.ExtensionId = extensionEntity.ExtensionId;
 

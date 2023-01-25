@@ -143,9 +143,34 @@ public class ExtensionFileManager : IExtensionFileManager
             _logger.Warning(ex, "Cannot delete temp files for {PackageId}", extensionManifest.PackageId);
         }
 
-        var readmeHtml = await _gitHubRepositoryService.GetReadmeAsync(extensionManifest.Repository);
-        var description = await _gitHubRepositoryService.GetDescriptionAsync(extensionManifest.Repository);
-        var license = await _gitHubRepositoryService.GetLicenseAsync(extensionManifest.Repository);
+        var readmeHtml = "";
+        var description = "";
+        var license = new GitHubLicense();
+
+        try
+        {
+            readmeHtml = await _gitHubRepositoryService.GetReadmeAsync(extensionManifest.Repository);
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Cannot get readme of {PackageId}", extensionManifest.PackageId);
+        }
+        try
+        {
+            description = await _gitHubRepositoryService.GetDescriptionAsync(extensionManifest.Repository);
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Cannot get description of {PackageId}", extensionManifest.PackageId);
+        }
+        try
+        {
+            license = await _gitHubRepositoryService.GetLicenseAsync(extensionManifest.Repository);
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Cannot get license of {PackageId}", extensionManifest.PackageId);
+        }
 
         result.Success = true;
         result.ExtensionManifest = extensionManifest;
