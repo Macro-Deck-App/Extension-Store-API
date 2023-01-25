@@ -30,7 +30,7 @@ public class ExtensionFileEntityConfig : IEntityTypeConfiguration<ExtensionFileE
         builder.Property(p => p.ReadmeHtml)
             .HasColumnName(ColumnPrefix + "readme_html")
             .IsRequired();
-        builder.Property(p => p.MD5Hash)
+        builder.Property(p => p.Md5Hash)
             .HasColumnName(ColumnPrefix + "md5_hash")
             .IsRequired();
         builder.Property(p => p.Description)

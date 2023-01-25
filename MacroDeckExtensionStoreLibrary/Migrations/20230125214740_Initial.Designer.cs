@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MacroDeckExtensionStoreLibrary.Migrations
 {
     [DbContext(typeof(ExtensionStoreDbContext))]
-    [Migration("20230125213646_Initial")]
+    [Migration("20230125214740_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -73,7 +73,6 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         .HasColumnName("ext_discord_author_userid");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("ext_description");
 
@@ -134,7 +133,7 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         .HasColumnType("text")
                         .HasColumnName("extfl_license_url");
 
-                    b.Property<string>("MD5Hash")
+                    b.Property<string>("Md5Hash")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("extfl_md5_hash");
