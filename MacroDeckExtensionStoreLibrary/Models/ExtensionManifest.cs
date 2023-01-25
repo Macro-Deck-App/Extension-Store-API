@@ -30,7 +30,7 @@ public class ExtensionManifest
      public string Version { get; set; }
 
      [JsonPropertyName("target-plugin-api-version")]
-     public int TargetPluginAPIVersion { get; set; } = 31;
+     public int TargetPluginApiVersion { get; set; } = 31;
 
      [JsonPropertyName("dll")]
      public string Dll { get; set; } = "";

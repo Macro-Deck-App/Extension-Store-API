@@ -7,7 +7,7 @@ public class ExtensionFile
     public string PackageFileName { get; set; }
     public string IconFileName { get; set; }
     public string DescriptionHtml { get; set; }
-    public string MD5Hash { get; set; }
+    public string Md5Hash { get; set; }
     public string LicenseName { get; set; }
     public string LicenseUrl { get; set; }
     public DateTime UploadDateTime { get; set; } = DateTime.Now;

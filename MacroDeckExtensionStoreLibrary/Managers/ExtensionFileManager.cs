@@ -135,7 +135,7 @@ public class ExtensionFileManager : IExtensionFileManager
             throw;
         }
 
-        var md5 = await MD5Util.GetMD5HashAsync(finalPackageFilePath);
+        var md5 = await Md5Util.GetMd5HashAsync(finalPackageFilePath);
         var readmeHtml = "";
         var description = "";
         var license = new GitHubLicense();
@@ -176,7 +176,7 @@ public class ExtensionFileManager : IExtensionFileManager
 
         result.Success = true;
         result.ExtensionManifest = extensionManifest;
-        result.MD5 = md5;
+        result.Md5 = md5;
         result.IconFileName = iconFileName;
         result.PackageFileName = packageFileName;
         result.LicenseName = license.Name;
