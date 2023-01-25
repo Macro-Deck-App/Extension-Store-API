@@ -16,6 +16,7 @@ public class ExtensionProfile : Profile
             .ForMember(dest => dest.ExtensionType, opt => opt.MapFrom(x => x.ExtensionType))
             .ForMember(dest => dest.PackageId, opt => opt.MapFrom(x => x.PackageId))
             .ForMember(dest => dest.GitHubRepository, opt => opt.MapFrom(x => x.GitHubRepository))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(x => x.Description))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name))
             .ForMember(dest => dest.DSupportUserId, opt => opt.MapFrom(x => x.DSupportUserId))
             .ForMember(dest => dest.ExtensionFiles, opt => opt.MapFrom(x => x.ExtensionFiles));
@@ -36,6 +37,7 @@ public class ExtensionProfile : Profile
             .ForMember(dest => dest.ExtensionType, opt => opt.MapFrom(x => x.ExtensionType))
             .ForMember(dest => dest.PackageId, opt => opt.MapFrom(x => x.PackageId))
             .ForMember(dest => dest.GitHubRepository, opt => opt.MapFrom(x => x.GitHubRepository))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(x => x.Description))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name))
             .ForMember(dest => dest.DSupportUserId, opt => opt.MapFrom(x => x.DSupportUserId));
 
@@ -45,6 +47,7 @@ public class ExtensionProfile : Profile
             .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name))
             .ForMember(dest => dest.Author, opt => opt.MapFrom(x => x.Author))
             .ForMember(dest => dest.GitHubRepository, opt => opt.MapFrom(x => x.GitHubRepository))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(x => x.Description))
             .ForMember(dest => dest.DSupportUserId, opt => opt.MapFrom(x => x.DSupportUserId))
             .ForMember(dest => dest.Downloads, opt => opt.MapFrom(x => x.Downloads))
             .ReverseMap();

@@ -75,7 +75,6 @@ public class ExtensionFileRepository : IExtensionFileRepository
         {
             throw new ErrorCodeException(400, $"A file with this version for the package Id {packageId} already exists",
                 ErrorCode.VersionAlreadyExists);
-            return;
         }
 
         var extensionEntity =

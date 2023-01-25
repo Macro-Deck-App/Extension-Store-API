@@ -1,5 +1,7 @@
 using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
+using MacroDeckExtensionStoreLibrary.Enums;
+using MacroDeckExtensionStoreLibrary.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -122,6 +124,20 @@ public class ExtensionRepository : IExtensionRepository
         await context.SaveChangesAsync();
     }
 
+    public async Task UpdateDescription(string packageId, string description)
+    {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var extensionEntity = await context.ExtensionEntities.FirstOrDefaultAsync(x => x.PackageId == packageId);
+        if (extensionEntity == null)
+        {
+            throw new ErrorCodeException(400, $"Package Id {packageId} not found", ErrorCode.PackageIdNotFound);
+        }
+
+        extensionEntity.Description = description;
+        await context.SaveChangesAsync();
+    }
+    
     public async Task<long> GetDownloadCountAsync(string packageId)
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();

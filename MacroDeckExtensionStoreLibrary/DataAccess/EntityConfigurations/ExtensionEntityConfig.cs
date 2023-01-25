@@ -30,6 +30,8 @@ public class ExtensionEntityConfig : IEntityTypeConfiguration<ExtensionEntity>
         builder.Property(p => p.Author)
             .HasColumnName(ColumnPrefix + "author")
             .IsRequired();
+        builder.Property(p => p.Description)
+            .HasColumnName(ColumnPrefix + "description");
         builder.Property(p => p.GitHubRepository)
             .HasColumnName(ColumnPrefix + "github_repository")
             .IsRequired();
