@@ -31,6 +31,7 @@
 
     <ItemGroup>
       <Folder Include="__testConfigs__\Data" />
+      <Folder Include="__testConfigs__\Temp" />
     </ItemGroup>
 
 </Project>

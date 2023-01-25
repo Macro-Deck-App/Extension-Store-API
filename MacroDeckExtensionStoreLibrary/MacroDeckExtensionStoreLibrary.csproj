@@ -23,4 +23,8 @@
       <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
       <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Migrations" />
+    </ItemGroup>
 </Project>
