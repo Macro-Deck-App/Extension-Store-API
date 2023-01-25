@@ -1,10 +1,12 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Timers;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Markdig;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using Timer = System.Timers.Timer;
 
 namespace MacroDeckExtensionStoreLibrary.Services;
 
@@ -17,12 +19,26 @@ public class GitHubRepositoryService : IGitHubRepositoryService
     private const string GitHubApi = "https://api.github.com";
     private const string RawGitHubUrl = "https://raw.githubusercontent.com";
 
+    private readonly Dictionary<string, HttpResponseMessage?> _cache = new();
+
+    private readonly Timer _cacheCleaner = new()
+    {
+        Interval = 1000 * 60 * 10
+    };
 
     public GitHubRepositoryService(IGitHubRepositoryLicenseUrlParser gitHubRepositoryLicenseUrlParser,
         HttpClient httpClient)
     {
         _gitHubRepositoryLicenseUrlParser = gitHubRepositoryLicenseUrlParser;
         _httpClient = httpClient;
+        _cacheCleaner.Elapsed += CacheCleanerOnElapsed;
+        _cacheCleaner.Start();
+    }
+
+    private void CacheCleanerOnElapsed(object? sender, ElapsedEventArgs e)
+    {
+        _logger.Verbose("Clearing GitHub cache ({NoEntries})", _cache.Count);
+        _cache.Clear();
     }
 
     private static string? GetRepositoryNameFromUrl(string? repositoryUrl)
@@ -101,11 +117,17 @@ public class GitHubRepositoryService : IGitHubRepositoryService
     private async Task<HttpResponseMessage?> MakeGetRequestAsync(string api, string? endpoint, params string?[] parameters)
     {
         var requestUrl = $"{api}/{endpoint}/{string.Join("/",parameters)}";
+        if (_cache.ContainsKey(requestUrl))
+        {
+            _logger.Verbose("Return cached {RequestUrl}", requestUrl);
+            return _cache[requestUrl];
+        }
         _logger.Verbose("Request url: {RequestUrl}", requestUrl);
         var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
         var productValue = new ProductInfoHeaderValue("MacroDeckExtensionStore", "1.0");
         request.Headers.UserAgent.Add(productValue);
         var response = await _httpClient.SendAsync(request);
+        _cache.Add(requestUrl, response);
         return response;
     }
 }
