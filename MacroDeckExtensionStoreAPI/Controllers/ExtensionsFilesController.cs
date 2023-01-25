@@ -2,8 +2,6 @@ using MacroDeckExtensionStoreAPI.Authentication;
 using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
-using ILogger = Serilog.ILogger;
 
 namespace MacroDeckExtensionStoreAPI.Controllers;
 
@@ -12,13 +10,10 @@ namespace MacroDeckExtensionStoreAPI.Controllers;
 public class ExtensionsFilesController : ControllerBase
 {
     private readonly IExtensionFileManager _extensionFileManager;
-    private readonly IExtensionManager _extensionManager;
-    private readonly ILogger _logger = Log.ForContext<ExtensionsFilesController>();
 
-    public ExtensionsFilesController(IExtensionFileManager extensionFileManager, IExtensionManager extensionManager)
+    public ExtensionsFilesController(IExtensionFileManager extensionFileManager)
     {
         _extensionFileManager = extensionFileManager;
-        _extensionManager = extensionManager;
     }
     
     [HttpGet("{packageId}")]
@@ -29,7 +24,6 @@ public class ExtensionsFilesController : ControllerBase
         {
             return NotFound("PackageId not found");
         }
-
         return Ok(extensionFiles);
     }
 
@@ -47,16 +41,12 @@ public class ExtensionsFilesController : ControllerBase
     [HttpGet("Download/{packageId}@{version}")]
     public async Task<ActionResult<byte[]>> DownloadExtensionFileAsync(string packageId, string version, int apiVersion = 3000)
     {
-        var fileBytes = await _extensionFileManager.GetFileBytesAsync(packageId, version);
+        var fileBytes = await _extensionFileManager.GetFileBytesAsync(packageId, apiVersion, version);
         if (fileBytes == null)
         {
             return NotFound("File not found");
         }
-
-        await _extensionManager.CountDownloadAsync(packageId, version);
-
         var fileName = $"{packageId.ToLower()}_{version.ToLower()}.macroDeckExtension";
-        
         return File(fileBytes, "application/zip", fileName);
     }
 
@@ -68,13 +58,8 @@ public class ExtensionsFilesController : ControllerBase
         var result = await _extensionFileManager.CreateFileAsync(stream);
         if (result == null)
         {
-            return StatusCode(500);
+            throw new Exception();
         }
-
-        return !result.Success
-            ? Problem(result.ErrorMessage,
-                statusCode: 500)
-            : Created(result.ExtensionManifest.PackageId,
-                result);
+        return Created(result.ExtensionManifest!.PackageId, result);
     }
 }

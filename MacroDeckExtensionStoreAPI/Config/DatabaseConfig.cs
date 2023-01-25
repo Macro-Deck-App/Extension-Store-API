@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace MacroDeckExtensionStoreAPI.Config;
 
 public class DatabaseConfig : LoadableConfig<DatabaseConfig>
@@ -12,6 +14,7 @@ public class DatabaseConfig : LoadableConfig<DatabaseConfig>
         return  $"Host={Host}; " +
                 $"Database={Database}; " +
                 $"Username={User}; " +
-                $"Password={Password};";
+                $"Password={Password};" +
+                $"Include Error Detail={Debugger.IsAttached};";
     }
 }

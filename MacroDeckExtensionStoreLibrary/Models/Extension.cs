@@ -10,6 +10,7 @@ public class Extension
     public string Author { get; set; }
     public string GitHubRepository { get; set; }
     public string DSupportUserId { get; set; }
-    public long Downloads { get; set; } = 0;
+    public long Downloads { get; set; }
+    
     public IList<ExtensionFile> ExtensionFiles { get; set; } = new List<ExtensionFile>();
 }

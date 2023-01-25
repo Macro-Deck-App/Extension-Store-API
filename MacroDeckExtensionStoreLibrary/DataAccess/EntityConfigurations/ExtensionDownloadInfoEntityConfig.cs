@@ -21,5 +21,7 @@ public class ExtensionDownloadInfoEntityConfig : IEntityTypeConfiguration<Extens
         builder.Property(p => p.DownloadDateTime)
             .HasColumnName(ColumnPrefix + "time")
             .IsRequired();
+        builder.Property(p => p.ExtensionId)
+            .HasColumnName(ColumnPrefix + "ext_ref");
     }
 }

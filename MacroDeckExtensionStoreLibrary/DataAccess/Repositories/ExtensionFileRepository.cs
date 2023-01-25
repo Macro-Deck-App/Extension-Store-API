@@ -75,6 +75,14 @@ public class ExtensionFileRepository : IExtensionFileRepository
             return;
         }
 
+        var extensionEntity =
+            await context.ExtensionEntities.AsNoTracking().FirstOrDefaultAsync(x => x.PackageId == packageId);
+        if (extensionEntity == null)
+        {
+            return;
+        }
+        extensionFileEntity.ExtensionId = extensionEntity.ExtensionId;
+
         await context.ExtensionFileEntities.AddAsync(extensionFileEntity);
         await context.SaveChangesAsync();
     }
