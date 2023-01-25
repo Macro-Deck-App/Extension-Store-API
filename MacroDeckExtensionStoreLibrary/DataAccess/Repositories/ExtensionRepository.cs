@@ -35,7 +35,9 @@ public class ExtensionRepository : IExtensionRepository
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
-        var extensionEntity = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads)
+        var extensionEntity = await context.ExtensionEntities.AsNoTracking()
+            .Include(x => x.ExtensionFiles)
+            .Include(x => x.Downloads)
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
         return extensionEntity;
     }
@@ -112,7 +114,7 @@ public class ExtensionRepository : IExtensionRepository
         }
         var extensionDownloadInfoEntity = new ExtensionDownloadInfoEntity
         {
-            ExtensionEntity = extensionEntity,
+            ExtensionId = extensionEntity.ExtensionId,
             DownloadedVersion = version,
             DownloadDateTime = DateTime.Now
         };

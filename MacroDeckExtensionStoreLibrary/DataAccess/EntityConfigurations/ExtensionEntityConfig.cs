@@ -18,6 +18,9 @@ public class ExtensionEntityConfig : IEntityTypeConfiguration<ExtensionEntity>
         builder.Property(p => p.ExtensionType)
             .HasColumnName(ColumnPrefix + "type")
             .IsRequired();
+        builder.Property(p => p.PackageId)
+            .HasColumnName(ColumnPrefix + "package_id")
+            .IsRequired();
         builder.Property(p => p.Author)
             .HasColumnName(ColumnPrefix + "author")
             .IsRequired();
@@ -31,18 +34,17 @@ public class ExtensionEntityConfig : IEntityTypeConfiguration<ExtensionEntity>
             .HasColumnName(ColumnPrefix + "github_repository")
             .IsRequired();
         builder.Property(p => p.DSupportUserId)
-            .HasColumnName(ColumnPrefix + "discord_author_userid")
-            .IsRequired();
+            .HasColumnName(ColumnPrefix + "discord_author_userid");
 
         builder.HasMany(p => p.ExtensionFiles)
             .WithOne(e => e.ExtensionEntity)
-            .HasForeignKey(e => e.ExtensionFileId)
+            .HasForeignKey(e => e.ExtensionId)
             .OnDelete(DeleteBehavior.Cascade);
         
         
         builder.HasMany(p => p.Downloads)
             .WithOne(e => e.ExtensionEntity)
-            .HasForeignKey(e => e.ExtensionDownloadId)
+            .HasForeignKey(e => e.ExtensionId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

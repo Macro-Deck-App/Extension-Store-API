@@ -41,6 +41,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<HttpClient>();
         
         builder.Services.AddSwagger();
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(options =>
+        {
+        });
     }
 }

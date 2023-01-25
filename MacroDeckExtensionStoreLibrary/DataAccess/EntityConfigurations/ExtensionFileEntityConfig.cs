@@ -27,14 +27,14 @@ public class ExtensionFileEntityConfig : IEntityTypeConfiguration<ExtensionFileE
         builder.Property(p => p.IconFileName)
             .HasColumnName(ColumnPrefix + "icon_filename")
             .IsRequired();
-        builder.Property(p => p.DescriptionHtml)
+        builder.Property(p => p.ReadmeHtml)
             .HasColumnName(ColumnPrefix + "readme_html")
             .IsRequired();
         builder.Property(p => p.MD5Hash)
             .HasColumnName(ColumnPrefix + "md5_hash")
             .IsRequired();
-        builder.Property(p => p.DescriptionHtml)
-            .HasColumnName(ColumnPrefix + "readme_html")
+        builder.Property(p => p.Description)
+            .HasColumnName(ColumnPrefix + "description")
             .IsRequired();
         builder.Property(p => p.LicenseName)
             .HasColumnName(ColumnPrefix + "license_name")
@@ -45,5 +45,7 @@ public class ExtensionFileEntityConfig : IEntityTypeConfiguration<ExtensionFileE
         builder.Property(p => p.UploadDateTime)
             .HasColumnName(ColumnPrefix + "upload_timestamp")
             .IsRequired();
+        builder.Property(p => p.ExtensionId)
+            .HasColumnName(ColumnPrefix + "ext_ref");
     }
 }

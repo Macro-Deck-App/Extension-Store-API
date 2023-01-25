@@ -29,4 +29,8 @@
       <ProjectReference Include="..\MacroDeckExtensionStoreLibrary\MacroDeckExtensionStoreLibrary.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="__testConfigs__\Data" />
+    </ItemGroup>
+
 </Project>

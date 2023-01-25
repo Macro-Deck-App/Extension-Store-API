@@ -1,10 +1,14 @@
 using AutoMapper;
 using JetBrains.Annotations;
+using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
 using MacroDeckExtensionStoreLibrary.Enums;
+using MacroDeckExtensionStoreLibrary.Exceptions;
+using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using MacroDeckExtensionStoreLibrary.Utils;
+using Microsoft.AspNetCore.Http;
 using Serilog;
 
 namespace MacroDeckExtensionStoreLibrary.Managers;
@@ -15,14 +19,17 @@ public class ExtensionFileManager : IExtensionFileManager
     private readonly ILogger _logger = Log.ForContext<ExtensionFileManager>();
     private readonly IExtensionFileRepository _extensionFileRepository;
     private readonly IExtensionManager _extensionManager;
+    private readonly IGitHubRepositoryService _gitHubRepositoryService;
     private readonly IMapper _mapper;
 
     public ExtensionFileManager(IExtensionFileRepository extensionFileRepository,
         IExtensionManager extensionManager,
+        IGitHubRepositoryService gitHubRepositoryService,
         IMapper mapper)
     {
         _extensionFileRepository = extensionFileRepository;
         _extensionManager = extensionManager;
+        _gitHubRepositoryService = gitHubRepositoryService;
         _mapper = mapper;
     }
     
@@ -39,7 +46,6 @@ public class ExtensionFileManager : IExtensionFileManager
         {
             return Array.Empty<ExtensionFile>();
         }
-
         var extensionFiles = _mapper.Map<ExtensionFile[]>(extensionFileEntities);
         return extensionFiles;
     }
@@ -49,9 +55,9 @@ public class ExtensionFileManager : IExtensionFileManager
         var extensionFileEntity = await _extensionFileRepository.GetFileAsync(packageId, targetApiVersion, version);
         if (extensionFileEntity == null)
         {
-            return null;
+            throw new ErrorCodeException(StatusCodes.Status400BadRequest,
+                $"No file for package id {packageId} with version {version} found", ErrorCode.VersionNotFound);
         }
-
         var extensionFile = _mapper.Map<ExtensionFile>(extensionFileEntity);
         return extensionFile;
     }
@@ -69,19 +75,18 @@ public class ExtensionFileManager : IExtensionFileManager
         var result = new ExtensionFileUploadResult();
         if (!File.Exists(tmpFilePath))
         {
-            result.Success = false;
-            result.ErrorMessage = "Internal error: cannot save package file from stream";
             _logger.Fatal("Cannot save package file from stream");
-            return result;
+            throw new Exception();
         }
         
         var extensionManifest = await ExtensionManifest.FromZipFilePathAsync(tmpFilePath);
         if (extensionManifest == null)
         {
             result.Success = false;
-            result.ErrorMessage = "ExtensionManifest not found";
             _logger.Fatal("ExtensionManifest does not exist");
-            return result;
+            throw new ErrorCodeException(StatusCodes.Status400BadRequest,
+                "ExtensionManifest was not found",
+                ErrorCode.ExtensionManifestNotFound);
         }
         var extensionExists = await _extensionManager.ExistsAsync(extensionManifest.PackageId);
         if (!extensionExists)
@@ -107,9 +112,8 @@ public class ExtensionFileManager : IExtensionFileManager
         if (iconMemoryStream == null)
         {
             result.Success = false;
-            result.ErrorMessage = "Internal error: Failed to extract icon";
             _logger.Fatal("Failed to extract icon");
-            return result;
+            throw new Exception();
         }
         await using var iconFileStream = File.Create(Path.Combine(Paths.DataDirectory, iconFileName));
         iconMemoryStream.Seek(0, SeekOrigin.Begin);
@@ -125,10 +129,8 @@ public class ExtensionFileManager : IExtensionFileManager
         }
         catch (Exception ex)
         {
-            result.Success = false;
-            result.ErrorMessage = "Internal error: cannot copy final package";
             _logger.Fatal(ex, "Cannot copy final package {PackageId}", extensionManifest.PackageId);
-            return result;
+            throw;
         }
 
         var md5 = await MD5Util.GetMD5HashAsync(finalPackageFilePath);
@@ -142,11 +144,24 @@ public class ExtensionFileManager : IExtensionFileManager
             _logger.Warning(ex, "Cannot delete temp files for {PackageId}", extensionManifest.PackageId);
         }
 
+        var readmeHtml = await _gitHubRepositoryService.GetReadmeAsync(extensionManifest.Repository);
+        var description = await _gitHubRepositoryService.GetDescriptionAsync(extensionManifest.Repository);
+        var license = await _gitHubRepositoryService.GetLicenseAsync(extensionManifest.Repository);
+
         result.Success = true;
         result.ExtensionManifest = extensionManifest;
         result.MD5 = md5;
         result.IconFileName = iconFileName;
         result.PackageFileName = packageFileName;
+        result.LicenseName = license.Name;
+        result.LicenseUrl = license.Url;
+        result.ReadmeHtml = readmeHtml;
+        result.Description = description;
+
+        var extensionFileEntity = _mapper.Map<ExtensionFileEntity>(result);
+
+        await _extensionFileRepository.CreateFileAsync(extensionManifest.PackageId, extensionFileEntity);
+
         return result;
     }
 
@@ -155,9 +170,9 @@ public class ExtensionFileManager : IExtensionFileManager
         throw new NotImplementedException();
     }
 
-    public async Task<byte[]?> GetFileBytesAsync(string packageId, string version)
+    public async Task<byte[]?> GetFileBytesAsync(string packageId, int targetApiVersion, string version)
     {
-        var extensionFile = await _extensionFileRepository.GetFileAsync(packageId, version: version);
+        var extensionFile = await _extensionFileRepository.GetFileAsync(packageId, targetApiVersion, version);
         if (extensionFile == null)
         {
             return null;
@@ -172,6 +187,7 @@ public class ExtensionFileManager : IExtensionFileManager
         try
         {
             var bytes = await File.ReadAllBytesAsync(filePath);
+            await _extensionManager.CountDownloadAsync(packageId, extensionFile.Version);
             return bytes;
         }
         catch (Exception ex)
