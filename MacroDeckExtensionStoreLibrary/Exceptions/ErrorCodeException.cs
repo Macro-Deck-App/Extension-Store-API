@@ -1,5 +1,4 @@
 using MacroDeckExtensionStoreLibrary.Enums;
-using Microsoft.AspNetCore.Http;
 
 namespace MacroDeckExtensionStoreLibrary.Exceptions;
 

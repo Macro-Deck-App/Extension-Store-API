@@ -8,7 +8,6 @@ using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using MacroDeckExtensionStoreLibrary.Utils;
-using Microsoft.AspNetCore.Http;
 using Serilog;
 
 namespace MacroDeckExtensionStoreLibrary.Managers;
@@ -55,7 +54,7 @@ public class ExtensionFileManager : IExtensionFileManager
         var extensionFileEntity = await _extensionFileRepository.GetFileAsync(packageId, targetApiVersion, version);
         if (extensionFileEntity == null)
         {
-            throw new ErrorCodeException(StatusCodes.Status400BadRequest,
+            throw new ErrorCodeException(400,
                 $"No file for package id {packageId} with version {version} found", ErrorCode.VersionNotFound);
         }
         var extensionFile = _mapper.Map<ExtensionFile>(extensionFileEntity);
@@ -84,7 +83,7 @@ public class ExtensionFileManager : IExtensionFileManager
         {
             result.Success = false;
             _logger.Fatal("ExtensionManifest does not exist");
-            throw new ErrorCodeException(StatusCodes.Status400BadRequest,
+            throw new ErrorCodeException(400,
                 "ExtensionManifest was not found",
                 ErrorCode.ExtensionManifestNotFound);
         }
