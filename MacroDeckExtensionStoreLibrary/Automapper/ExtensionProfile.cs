@@ -20,6 +20,16 @@ public class ExtensionProfile : Profile
             .ForMember(dest => dest.DSupportUserId, opt => opt.MapFrom(x => x.DSupportUserId))
             .ForMember(dest => dest.ExtensionFiles, opt => opt.MapFrom(x => x.ExtensionFiles));
 
+        CreateMap<Extension, ExtensionEntity>()
+            .ForMember(dest => dest.Author, opt => opt.MapFrom(x => x.Author))
+            .ForMember(dest => dest.Downloads, opt => opt.Ignore())
+            .ForMember(dest => dest.ExtensionType, opt => opt.MapFrom(x => x.ExtensionType))
+            .ForMember(dest => dest.PackageId, opt => opt.MapFrom(x => x.PackageId))
+            .ForMember(dest => dest.GitHubRepository, opt => opt.MapFrom(x => x.GitHubRepository))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name))
+            .ForMember(dest => dest.DSupportUserId, opt => opt.MapFrom(x => x.DSupportUserId))
+            .ForMember(dest => dest.ExtensionFiles, opt => opt.MapFrom(x => x.ExtensionFiles));
+        
         CreateMap<ExtensionEntity, ExtensionSummary>()
             .ForMember(dest => dest.Author, opt => opt.MapFrom(x => x.Author))
             .ForMember(dest => dest.Downloads, opt => opt.MapFrom(x => x.Downloads.Count))

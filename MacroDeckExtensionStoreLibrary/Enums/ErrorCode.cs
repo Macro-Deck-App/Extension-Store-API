@@ -5,5 +5,6 @@ public enum ErrorCode
     InternalError,
     ExtensionManifestNotFound,
     VersionNotFound,
-    PackageIdNotFound
+    PackageIdNotFound,
+    VersionAlreadyExists
 }
