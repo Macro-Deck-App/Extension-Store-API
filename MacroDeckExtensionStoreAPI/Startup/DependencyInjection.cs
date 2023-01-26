@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MacroDeckExtensionStoreAPI.Config;
 using MacroDeckExtensionStoreLibrary;
 using MacroDeckExtensionStoreLibrary.Automapper;
@@ -41,8 +42,12 @@ public static class DependencyInjection
         builder.Services.AddScoped<HttpClient>();
         
         builder.Services.AddSwagger();
-        builder.Services.AddControllers(options =>
-        {
-        });
+        builder.Services.AddControllers()
+            .AddJsonOptions(opts =>
+            {
+                var enumConverter = new JsonStringEnumConverter();
+                opts.JsonSerializerOptions.Converters.Add(enumConverter);
+                opts.JsonSerializerOptions.AllowTrailingCommas = true;
+            });
     }
 }

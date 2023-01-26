@@ -1,28 +1,16 @@
 using MacroDeckExtensionStoreLibrary.Interfaces;
-using MacroDeckExtensionStoreLibrary.Parsers;
 using MacroDeckExtensionStoreLibrary.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MacroDeckExtensionStoreTests;
 
 public class GitHubServiceTest
 {
-    private readonly GitHubRepositoryLicenseUrlParser _gitHubRepositoryLicenseUrlParser;
     private readonly IGitHubRepositoryService _repositoryService;
 
     public GitHubServiceTest()
     {
         var httpClient = new HttpClient();
-        _gitHubRepositoryLicenseUrlParser = new GitHubRepositoryLicenseUrlParser();
-        _repositoryService = new GitHubRepositoryService(_gitHubRepositoryLicenseUrlParser, httpClient);
-    }
-
-    [TestCase("https://github.com/SuchByte/Macro-Deck-Twitch-Plugin")]
-    public void ParserTest(string repositoryUrl)
-    {
-        var parsed = _gitHubRepositoryLicenseUrlParser.Parse(repositoryUrl, "main");
-        Assert.That(parsed, Is.EqualTo("https://raw.githubusercontent.com/SuchByte/Macro-Deck-Twitch-Plugin/main/LICENSE"));
+        _repositoryService = new GitHubRepositoryService(httpClient);
     }
 
     [Test]

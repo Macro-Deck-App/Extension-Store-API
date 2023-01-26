@@ -2,6 +2,7 @@ using AutoMapper;
 using JetBrains.Annotations;
 using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
+using MacroDeckExtensionStoreLibrary.Exceptions;
 using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Serilog;
@@ -36,12 +37,12 @@ public class ExtensionManager : IExtensionManager
         return extensions;
     }
 
-    public async Task<Extension?> GetByPackageIdAsync(string packageId)
+    public async Task<Extension> GetByPackageIdAsync(string packageId)
     {
         var extensionEntity = await _extensionRepository.GetByPackageIdAsync(packageId);
         if (extensionEntity == null)
         {
-            return null;
+            throw ErrorCodeExceptions.PackageIdNotFoundException();
         }
 
         var extension = _mapper.Map<Extension>(extensionEntity);
@@ -95,18 +96,18 @@ public class ExtensionManager : IExtensionManager
         }
     }
 
-    public async Task<FileStream?> GetIconStreamAsync(string packageId)
+    public async Task<FileStream> GetIconStreamAsync(string packageId)
     {
         var extensionFile = await _extensionFileRepository.GetFileAsync(packageId);
         if (extensionFile == null)
         {
-            return null;
+            throw ErrorCodeExceptions.PackageIdNotFoundException();
         }
         var iconPath = Path.Combine(Paths.DataDirectory, extensionFile.IconFileName);
         if (!File.Exists(iconPath))
         {
             _logger.Fatal("Icon file for {PackageId} does not exist", packageId);
-            return null;
+            throw ErrorCodeExceptions.IconNotFoundException();
         }
 
         try
@@ -119,9 +120,8 @@ public class ExtensionManager : IExtensionManager
         catch (Exception ex)
         {
             _logger.Fatal(ex, "Cannot open icon for {PackageId}", packageId);
+            throw ErrorCodeExceptions.InternalErrorException();
         }
-
-        return null;
     }
 
     public async Task CountDownloadAsync(string packageId, string version)

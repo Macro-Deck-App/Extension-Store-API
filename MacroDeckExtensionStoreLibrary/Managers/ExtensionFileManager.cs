@@ -41,7 +41,7 @@ public class ExtensionFileManager : IExtensionFileManager
         return exist;
     }
 
-    public async Task<ExtensionFile[]?> GetFilesAsync(string packageId)
+    public async Task<ExtensionFile[]> GetFilesAsync(string packageId)
     {
         var extensionFileEntities = await _extensionFileRepository.GetFilesAsync(packageId);
         if (extensionFileEntities.Length == 0)
@@ -52,19 +52,18 @@ public class ExtensionFileManager : IExtensionFileManager
         return extensionFiles;
     }
 
-    public async Task<ExtensionFile?> GetFileAsync(string packageId, int? targetApiVersion = null, string version = "latest")
+    public async Task<ExtensionFile> GetFileAsync(string packageId, int? targetApiVersion = null, string version = "latest")
     {
         var extensionFileEntity = await _extensionFileRepository.GetFileAsync(packageId, targetApiVersion, version);
         if (extensionFileEntity == null)
         {
-            throw new ErrorCodeException(400,
-                $"No file for package id {packageId} with version {version} found", ErrorCode.VersionNotFound);
+            ErrorCodeExceptions.VersionNotFoundException();
         }
         var extensionFile = _mapper.Map<ExtensionFile>(extensionFileEntity);
         return extensionFile;
     }
 
-    public async Task<ExtensionFileUploadResult?> CreateFileAsync(Stream packageStream)
+    public async Task<ExtensionFileUploadResult> CreateFileAsync(Stream packageStream)
     {
         var tmpFilePath = Path.Combine(Paths.TempDirectory, Guid.NewGuid().ToString());
         await using var tmpFileStream = File.Create(tmpFilePath);
@@ -74,21 +73,17 @@ public class ExtensionFileManager : IExtensionFileManager
         packageStream.Close();
         await tmpFileStream.DisposeAsync();
         await packageStream.DisposeAsync();
-        var result = new ExtensionFileUploadResult();
         if (!File.Exists(tmpFilePath))
         {
             _logger.Fatal("Cannot save package file from stream");
-            throw new Exception();
+            throw ErrorCodeExceptions.InternalErrorException();
         }
         
         var extensionManifest = await ExtensionManifest.FromZipFilePathAsync(tmpFilePath);
         if (extensionManifest == null)
         {
-            result.Success = false;
             _logger.Fatal("ExtensionManifest does not exist");
-            throw new ErrorCodeException(400,
-                "ExtensionManifest was not found",
-                ErrorCode.ExtensionManifestNotFound);
+            throw ErrorCodeExceptions.ExtensionManifestNotFoundException();
         }
         var extensionExists = await _extensionManager.ExistsAsync(extensionManifest.PackageId);
         if (!extensionExists)
@@ -113,11 +108,12 @@ public class ExtensionFileManager : IExtensionFileManager
 
         if (iconMemoryStream == null)
         {
-            result.Success = false;
             _logger.Fatal("Failed to extract icon");
-            throw new Exception();
+            throw ErrorCodeExceptions.InternalErrorException();
         }
-        await using var iconFileStream = File.Create(Path.Combine(Paths.DataDirectory, iconFileName));
+
+        var finalIconPath = Path.Combine(Paths.DataDirectory, iconFileName);
+        await using var iconFileStream = File.Create(finalIconPath);
         iconMemoryStream.Seek(0, SeekOrigin.Begin);
         await iconMemoryStream.CopyToAsync(iconFileStream);
         iconMemoryStream.Close();
@@ -165,30 +161,32 @@ public class ExtensionFileManager : IExtensionFileManager
             _logger.Warning(ex, "Cannot get license of {PackageId}", extensionManifest.PackageId);
         }
         
-        try
+        var result = new ExtensionFileUploadResult
         {
-            File.Delete(tmpFilePath);
-        }
-        catch (Exception ex)
-        {
-            _logger.Warning(ex, "Cannot delete temp files for {PackageId}", extensionManifest.PackageId);
-        }
-
-        result.Success = true;
-        result.ExtensionManifest = extensionManifest;
-        result.Md5 = md5;
-        result.IconFileName = iconFileName;
-        result.PackageFileName = packageFileName;
-        result.LicenseName = license.Name;
-        result.LicenseUrl = license.Url;
-        result.ReadmeHtml = readmeHtml;
-        result.Description = description;
+            Success = true,
+            ExtensionManifest = extensionManifest,
+            Md5 = md5,
+            IconFileName = iconFileName,
+            PackageFileName = packageFileName,
+            LicenseName = license.Name,
+            LicenseUrl = license.Url,
+            ReadmeHtml = readmeHtml,
+            Description = description
+        };
 
         var extensionFileEntity = _mapper.Map<ExtensionFileEntity>(result);
 
-        await _extensionFileRepository.CreateFileAsync(extensionManifest.PackageId, extensionFileEntity);
+        try
+        {
+            await _extensionFileRepository.CreateFileAsync(extensionManifest.PackageId, extensionFileEntity);
+        } catch
+        {
+            SafeDelete.Delete(finalPackageFilePath);
+            SafeDelete.Delete(finalIconPath);
+        }
+        SafeDelete.Delete(tmpFilePath);
+        
         await _extensionRepository.UpdateDescription(extensionManifest.PackageId, description);
-
         return result;
     }
 
@@ -197,18 +195,18 @@ public class ExtensionFileManager : IExtensionFileManager
         throw new NotImplementedException();
     }
 
-    public async Task<byte[]?> GetFileBytesAsync(string packageId, int targetApiVersion, string version)
+    public async Task<byte[]> GetFileBytesAsync(string packageId, int targetApiVersion, string version)
     {
         var extensionFile = await _extensionFileRepository.GetFileAsync(packageId, targetApiVersion, version);
         if (extensionFile == null)
         {
-            return null;
+            throw ErrorCodeExceptions.VersionNotFoundException();
         }
         var filePath = Path.Combine(Paths.DataDirectory, extensionFile.PackageFileName);
         if (!File.Exists(filePath))
         {
             _logger.Fatal("Package for {PackageId} does not exist", packageId);
-            return null;
+            throw ErrorCodeExceptions.FileNotFoundException();
         }
 
         try
@@ -220,7 +218,7 @@ public class ExtensionFileManager : IExtensionFileManager
         catch (Exception ex)
         {
             _logger.Fatal(ex, "Error while reading package file for {PackageId}", packageId);
-            return null;
+            throw ErrorCodeExceptions.InternalErrorException();
         }
     }
     
