@@ -1,4 +1,3 @@
-using MacroDeckExtensionStoreLibrary.Enums;
 using MacroDeckExtensionStoreLibrary.Exceptions;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -31,16 +30,15 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleException(HttpContext context, Exception exception)
     {
-        var message = "Internal error: something went wrong on your request. Please contact the Macro Deck team.";
-        var errorCode = ErrorCode.InternalError;
-        var statusCode = StatusCodes.Status500InternalServerError;
-        if (exception.GetType() == typeof(ErrorCodeException))
+        if (exception.GetType() != typeof(ErrorCodeException))
         {
-            var errorCodeException = exception as ErrorCodeException;
-            message = errorCodeException?.Message;
-            errorCode = errorCodeException?.ErrorCode ?? 0;
-            statusCode = errorCodeException?.StatusCode ?? StatusCodes.Status501NotImplemented;
+            exception = ErrorCodeExceptions.InternalErrorException();
         }
+        
+        var errorCodeException = exception as ErrorCodeException;
+        var message = errorCodeException?.Message;
+        var errorCode = errorCodeException?.ErrorCode ?? 0;
+        var statusCode = errorCodeException?.StatusCode ?? StatusCodes.Status501NotImplemented;
         
         object errorMessage = new
         {

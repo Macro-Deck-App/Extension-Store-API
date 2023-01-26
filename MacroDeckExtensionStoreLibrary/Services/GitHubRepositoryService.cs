@@ -13,7 +13,6 @@ namespace MacroDeckExtensionStoreLibrary.Services;
 public class GitHubRepositoryService : IGitHubRepositoryService
 {
     private readonly ILogger _logger = Log.ForContext<GitHubRepositoryService>();
-    private readonly IGitHubRepositoryLicenseUrlParser _gitHubRepositoryLicenseUrlParser;
     private readonly HttpClient _httpClient;
 
     private const string GitHubApi = "https://api.github.com";
@@ -26,10 +25,8 @@ public class GitHubRepositoryService : IGitHubRepositoryService
         Interval = 1000 * 60 * 10
     };
 
-    public GitHubRepositoryService(IGitHubRepositoryLicenseUrlParser gitHubRepositoryLicenseUrlParser,
-        HttpClient httpClient)
+    public GitHubRepositoryService(HttpClient httpClient)
     {
-        _gitHubRepositoryLicenseUrlParser = gitHubRepositoryLicenseUrlParser;
         _httpClient = httpClient;
         _cacheCleaner.Elapsed += CacheCleanerOnElapsed;
         _cacheCleaner.Start();

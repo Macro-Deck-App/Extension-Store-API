@@ -1,6 +1,5 @@
 using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
-using MacroDeckExtensionStoreLibrary.Enums;
 using MacroDeckExtensionStoreLibrary.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,11 +48,12 @@ public class ExtensionRepository : IExtensionRepository
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         query = query.ToLower().Trim();
-        var matches = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(x => 
-                                                            x.PackageId.ToLower().Contains(query) ||
-                                                            x.Name.ToLower().Contains(query) ||
-                                                            x.Author.ToLower().Contains(query) ||
-                                                            x.DSupportUserId.ToLower().Contains(query)).ToArrayAsync();
+        var matches = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(x =>
+            x.PackageId.ToLower().Contains(query) ||
+            x.Name.ToLower().Contains(query) ||
+            x.Author.ToLower().Contains(query) ||
+            (x.DSupportUserId != null && x.DSupportUserId.ToLower().Contains(query)))
+            .ToArrayAsync();
         return matches;
     }
 
@@ -81,7 +81,7 @@ public class ExtensionRepository : IExtensionRepository
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
         if (extensionEntity == null)
         {
-            return;
+            throw ErrorCodeExceptions.PackageIdNotFoundException();
         }
 
         context.ExtensionEntities.Remove(extensionEntity);
@@ -131,7 +131,7 @@ public class ExtensionRepository : IExtensionRepository
         var extensionEntity = await context.ExtensionEntities.FirstOrDefaultAsync(x => x.PackageId == packageId);
         if (extensionEntity == null)
         {
-            throw new ErrorCodeException(400, $"Package Id {packageId} not found", ErrorCode.PackageIdNotFound);
+            throw ErrorCodeExceptions.PackageIdNotFoundException();
         }
 
         extensionEntity.Description = description;
