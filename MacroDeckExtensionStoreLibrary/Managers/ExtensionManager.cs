@@ -26,9 +26,9 @@ public class ExtensionManager : IExtensionManager
         _mapper = mapper;
     }
 
-    public async Task<ExtensionSummary[]> GetExtensionsAsync()
+    public async Task<ExtensionSummary[]> GetExtensionsAsync(Filter filter, Pagination pagination)
     {
-        var extensionEntities = await _extensionRepository.GetExtensionsAsync();
+        var extensionEntities = await _extensionRepository.GetExtensionsAsync(filter, pagination);
         if (extensionEntities.Length == 0)
         {
             return Array.Empty<ExtensionSummary>();

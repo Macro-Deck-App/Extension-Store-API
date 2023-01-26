@@ -16,9 +16,11 @@ public class ExtensionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ExtensionSummary[]>> GetExtensionsAsync()
+    public async Task<ActionResult<ExtensionSummary[]>> GetExtensionsAsync(
+        [FromQuery] Filter filter,
+        [FromQuery] Pagination pagination)
     {
-        var extensions = await _extensionManager.GetExtensionsAsync();
+        var extensions = await _extensionManager.GetExtensionsAsync(filter, pagination);
         return Ok(extensions);
     }
 

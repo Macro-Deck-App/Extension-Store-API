@@ -4,7 +4,7 @@ namespace MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 
 public interface IExtensionManager
 {
-    public Task<ExtensionSummary[]> GetExtensionsAsync();
+    public Task<ExtensionSummary[]> GetExtensionsAsync(Filter filter, Pagination pagination);
     public Task<Extension> GetByPackageIdAsync(string packageId);
     public Task<bool> ExistsAsync(string packageId);
     public Task<ExtensionSummary[]> SearchAsync(string query);

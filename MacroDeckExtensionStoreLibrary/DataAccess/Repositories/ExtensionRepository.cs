@@ -1,6 +1,8 @@
 using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 using MacroDeckExtensionStoreLibrary.DataAccess.RepositoryInterfaces;
+using MacroDeckExtensionStoreLibrary.Enums;
 using MacroDeckExtensionStoreLibrary.Exceptions;
+using MacroDeckExtensionStoreLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,11 +26,15 @@ public class ExtensionRepository : IExtensionRepository
         return exist;
     }
 
-    public async Task<ExtensionEntity[]> GetExtensionsAsync()
+    public async Task<ExtensionEntity[]> GetExtensionsAsync(Filter filter, Pagination pagination)
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
-        var extensionEntities = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).ToArrayAsync();
+        var extensionEntities = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(x =>
+                filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
+                filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack)
+            .Skip(pagination.Page * pagination.ItemsPerPage)
+            .Take(pagination.ItemsPerPage).ToArrayAsync();
         return extensionEntities;
     }
 
