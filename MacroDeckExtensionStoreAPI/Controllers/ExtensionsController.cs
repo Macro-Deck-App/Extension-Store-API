@@ -18,11 +18,17 @@ public class ExtensionsController : ControllerBase
         _extensionManager = extensionManager;
     }
 
-
     [HttpGet]
     public async Task<ActionResult<ExtensionSummary[]>> GetExtensionsAsync()
     {
         var extensions = await _extensionManager.GetExtensionsAsync();
+        return Ok(extensions);
+    }
+
+    [HttpGet("search/{query}")]
+    public async Task<ActionResult<ExtensionSummary[]>> SearchAsync(string query)
+    {
+        var extensions = await _extensionManager.SearchAsync(query);
         return Ok(extensions);
     }
 
