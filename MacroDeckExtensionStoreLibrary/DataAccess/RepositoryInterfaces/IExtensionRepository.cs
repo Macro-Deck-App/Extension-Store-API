@@ -9,7 +9,7 @@ public interface IExtensionRepository
     public Task<PagedData<ExtensionEntity[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination);
     public Task<ExtensionEntity[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count);
     public Task<ExtensionEntity?> GetByPackageIdAsync(string packageId);
-    public Task<ExtensionEntity[]> SearchAsync(string query);
+    public Task<PagedData<ExtensionEntity[]>> SearchAsync(string query, Filter filter, Pagination pagination);
     public Task CreateExtensionAsync(ExtensionEntity extensionEntity);
     public Task DeleteExtensionAsync(string packageId);
     public Task UpdateExtensionAsync(ExtensionEntity extensionEntity);

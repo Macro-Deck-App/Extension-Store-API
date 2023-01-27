@@ -62,18 +62,10 @@ public class ExtensionManager : IExtensionManager
         return exists;
     }
 
-    public async Task<ExtensionSummary[]> SearchAsync(string query)
+    public async Task<PagedData<ExtensionSummary[]>> SearchAsync(string query, Filter filter, Pagination pagination)
     {
-        if (query.Length < 3)
-        {
-            return Array.Empty<ExtensionSummary>();
-        }
-        var extensionEntities = await _extensionRepository.SearchAsync(query);
-        if (extensionEntities.Length == 0)
-        {
-            return Array.Empty<ExtensionSummary>();
-        }
-        var extensions = _mapper.Map<ExtensionSummary[]>(extensionEntities);
+        var extensionEntities = await _extensionRepository.SearchAsync(query, filter, pagination);
+        var extensions = _mapper.Map<PagedData<ExtensionSummary[]>>(extensionEntities);
         return extensions;
     }
 

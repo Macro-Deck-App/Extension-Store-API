@@ -36,19 +36,18 @@ public class ExtensionRepository : IExtensionRepository
                     filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack)
             .OrderBy(x => x.Name);
         var extensionEntitiesCount = await filteredExtensionEntities.CountAsync();
+        var offset = (pagination.Page - 1) * pagination.ItemsPerPage;
         var pagedExtensionEntities = 
-            await filteredExtensionEntities.Skip(pagination.Page * pagination.ItemsPerPage)
+            await filteredExtensionEntities.Skip(offset)
             .Take(pagination.ItemsPerPage).ToArrayAsync();
 
-        var pagedData = new PagedData<ExtensionEntity[]>
+        return new PagedData<ExtensionEntity[]>
         {
             TotalItemsCount = extensionEntitiesCount,
             CurrentPage = pagination.Page,
             ItemsPerPage = pagination.ItemsPerPage,
             Data = pagedExtensionEntities
         };
-
-        return pagedData;
     }
 
     public async Task<ExtensionEntity[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
@@ -77,20 +76,32 @@ public class ExtensionRepository : IExtensionRepository
         return extensionEntity;
     }
 
-    public async Task<ExtensionEntity[]> SearchAsync(string query)
+    public async Task<PagedData<ExtensionEntity[]>> SearchAsync(string query, Filter filter, Pagination pagination)
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         query = query.ToLower().Trim();
-        var matches = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(x =>
-            x.PackageId.ToLower().Contains(query) ||
-            x.Name.ToLower().Contains(query) ||
-            x.Author.ToLower().Contains(query) ||
-            (x.DSupportUserId != null && x.DSupportUserId.ToLower().Contains(query)))
-            .OrderBy(x => x.Name)
-            .Take(25)
-            .ToArrayAsync();
-        return matches;
+        var filteredMatches = context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads)
+            .Where(x =>
+                x.PackageId.ToLower().Contains(query) ||
+                x.Name.ToLower().Contains(query) ||
+                x.Author.ToLower().Contains(query) ||
+                (x.DSupportUserId != null && x.DSupportUserId.ToLower().Contains(query)))
+            .OrderBy(x => x.Name);
+
+        var filteredMatchesCount = await filteredMatches.CountAsync();
+        var offset = (pagination.Page - 1) * pagination.ItemsPerPage;
+        var pagedMatches = 
+            await filteredMatches.Skip(offset)
+                .Take(pagination.ItemsPerPage).ToArrayAsync();
+        
+        return new PagedData<ExtensionEntity[]>
+        {
+            TotalItemsCount = filteredMatchesCount,
+            CurrentPage = pagination.Page,
+            ItemsPerPage = pagination.ItemsPerPage,
+            Data = pagedMatches
+        };
     }
 
     public async Task CreateExtensionAsync(ExtensionEntity extensionEntity)
