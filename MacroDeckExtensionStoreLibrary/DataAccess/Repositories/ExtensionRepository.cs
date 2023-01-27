@@ -26,15 +26,43 @@ public class ExtensionRepository : IExtensionRepository
         return exist;
     }
 
-    public async Task<ExtensionEntity[]> GetExtensionsAsync(Filter filter, Pagination pagination)
+    public async Task<PagedData<ExtensionEntity[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination)
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
-        var extensionEntities = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(x =>
-                filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
-                filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack)
-            .Skip(pagination.Page * pagination.ItemsPerPage)
+        var filteredExtensionEntities = context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(
+                x =>
+                    filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
+                    filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack)
+            .OrderBy(x => x.Name);
+        var extensionEntitiesCount = await filteredExtensionEntities.CountAsync();
+        var pagedExtensionEntities = 
+            await filteredExtensionEntities.Skip(pagination.Page * pagination.ItemsPerPage)
             .Take(pagination.ItemsPerPage).ToArrayAsync();
+
+        var pagedData = new PagedData<ExtensionEntity[]>
+        {
+            TotalItemsCount = extensionEntitiesCount,
+            CurrentPage = pagination.Page,
+            ItemsPerPage = pagination.ItemsPerPage,
+            Data = pagedExtensionEntities
+        };
+
+        return pagedData;
+    }
+
+    public async Task<ExtensionEntity[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
+    {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var extensionEntities = await context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads)
+            .Where(x => filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin 
+                        || filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack)
+            .OrderByDescending(d =>
+                d.Downloads.Count(y =>
+                    y.DownloadDateTime.Year == year && y.DownloadDateTime.Month == month)).Take(count)
+            .ToArrayAsync();
+
         return extensionEntities;
     }
 
@@ -59,6 +87,8 @@ public class ExtensionRepository : IExtensionRepository
             x.Name.ToLower().Contains(query) ||
             x.Author.ToLower().Contains(query) ||
             (x.DSupportUserId != null && x.DSupportUserId.ToLower().Contains(query)))
+            .OrderBy(x => x.Name)
+            .Take(25)
             .ToArrayAsync();
         return matches;
     }

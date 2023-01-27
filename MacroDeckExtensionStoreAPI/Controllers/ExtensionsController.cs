@@ -16,12 +16,19 @@ public class ExtensionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ExtensionSummary[]>> GetExtensionsAsync(
+    public async Task<ActionResult<PagedData<ExtensionSummary[]>>> GetExtensionsAsync(
         [FromQuery] Filter filter,
         [FromQuery] Pagination pagination)
     {
-        var extensions = await _extensionManager.GetExtensionsAsync(filter, pagination);
+        var extensions = await _extensionManager.GetExtensionsPagedAsync(filter, pagination);
         return Ok(extensions);
+    }
+
+    [HttpGet("topDownloads")]
+    public async Task<ActionResult<ExtensionSummary[]>> GetTopDownloadsOfMonth([FromQuery] Filter filter, int month, int year, int count = 3)
+    {
+        var topDownloads = await _extensionManager.GetTopDownloadsOfMonth(filter, month, year, count);
+        return Ok(topDownloads);
     }
 
     [HttpGet("search/{query}")]

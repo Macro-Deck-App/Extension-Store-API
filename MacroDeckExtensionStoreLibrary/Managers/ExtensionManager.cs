@@ -26,14 +26,10 @@ public class ExtensionManager : IExtensionManager
         _mapper = mapper;
     }
 
-    public async Task<ExtensionSummary[]> GetExtensionsAsync(Filter filter, Pagination pagination)
+    public async Task<PagedData<ExtensionSummary[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination)
     {
-        var extensionEntities = await _extensionRepository.GetExtensionsAsync(filter, pagination);
-        if (extensionEntities.Length == 0)
-        {
-            return Array.Empty<ExtensionSummary>();
-        }
-        var extensions = _mapper.Map<ExtensionSummary[]>(extensionEntities);
+        var extensionEntities = await _extensionRepository.GetExtensionsPagedAsync(filter, pagination);
+        var extensions = _mapper.Map<PagedData<ExtensionSummary[]>>(extensionEntities);
         return extensions;
     }
 
@@ -47,6 +43,17 @@ public class ExtensionManager : IExtensionManager
 
         var extension = _mapper.Map<Extension>(extensionEntity);
         return extension;
+    }
+
+    public async Task<ExtensionSummary[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
+    {
+        var topEntities = await _extensionRepository.GetTopDownloadsOfMonth(filter, month, year, count);
+        if (topEntities.Length == 0)
+        {
+            return Array.Empty<ExtensionSummary>();
+        }
+        var top = _mapper.Map<ExtensionSummary[]>(topEntities);
+        return top;
     }
 
     public async Task<bool> ExistsAsync(string packageId)
