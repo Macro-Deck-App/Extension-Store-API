@@ -11,6 +11,6 @@ public class ExtensionSummary
     public string Description { get; set; }
     public string GitHubRepository { get; set; }
     public string DSupportUserId { get; set; }
-    public long Downloads { get; set; }
+    public long TotalDownloads { get; set; }
 
 }

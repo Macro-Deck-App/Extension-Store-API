@@ -11,13 +11,15 @@ public class ExtensionProfile : Profile
     public ExtensionProfile()
     {
         CreateMap<ExtensionEntity, Extension>()
-            .ForMember(dest => dest.Downloads, opt => opt.MapFrom(x => x.Downloads.Count));
+            .ForMember(dest => dest.TotalDownloads, opt => opt.MapFrom(x => x.Downloads.Count));
 
         CreateMap<Extension, ExtensionEntity>()
             .ForMember(dest => dest.Downloads, opt => opt.Ignore());
-
+        
+        CreateMap(typeof(PagedData<>), typeof(PagedData<>));
+        
         CreateMap<ExtensionEntity, ExtensionSummary>()
-            .ForMember(dest => dest.Downloads, opt => opt.MapFrom(x => x.Downloads.Count));
+            .ForMember(dest => dest.TotalDownloads, opt => opt.MapFrom(x => x.Downloads.Count));
 
         CreateMap<Extension, ExtensionSummary>()
             .ReverseMap();

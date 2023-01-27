@@ -26,14 +26,10 @@ public class ExtensionManager : IExtensionManager
         _mapper = mapper;
     }
 
-    public async Task<ExtensionSummary[]> GetExtensionsAsync()
+    public async Task<PagedData<ExtensionSummary[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination)
     {
-        var extensionEntities = await _extensionRepository.GetExtensionsAsync();
-        if (extensionEntities.Length == 0)
-        {
-            return Array.Empty<ExtensionSummary>();
-        }
-        var extensions = _mapper.Map<ExtensionSummary[]>(extensionEntities);
+        var extensionEntities = await _extensionRepository.GetExtensionsPagedAsync(filter, pagination);
+        var extensions = _mapper.Map<PagedData<ExtensionSummary[]>>(extensionEntities);
         return extensions;
     }
 
@@ -49,24 +45,27 @@ public class ExtensionManager : IExtensionManager
         return extension;
     }
 
+    public async Task<ExtensionSummary[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
+    {
+        var topEntities = await _extensionRepository.GetTopDownloadsOfMonth(filter, month, year, count);
+        if (topEntities.Length == 0)
+        {
+            return Array.Empty<ExtensionSummary>();
+        }
+        var top = _mapper.Map<ExtensionSummary[]>(topEntities);
+        return top;
+    }
+
     public async Task<bool> ExistsAsync(string packageId)
     {
         var exists = await _extensionRepository.ExistAsync(packageId);
         return exists;
     }
 
-    public async Task<ExtensionSummary[]> SearchAsync(string query)
+    public async Task<PagedData<ExtensionSummary[]>> SearchAsync(string query, Filter filter, Pagination pagination)
     {
-        if (query.Length < 3)
-        {
-            return Array.Empty<ExtensionSummary>();
-        }
-        var extensionEntities = await _extensionRepository.SearchAsync(query);
-        if (extensionEntities.Length == 0)
-        {
-            return Array.Empty<ExtensionSummary>();
-        }
-        var extensions = _mapper.Map<ExtensionSummary[]>(extensionEntities);
+        var extensionEntities = await _extensionRepository.SearchAsync(query, filter, pagination);
+        var extensions = _mapper.Map<PagedData<ExtensionSummary[]>>(extensionEntities);
         return extensions;
     }
 
