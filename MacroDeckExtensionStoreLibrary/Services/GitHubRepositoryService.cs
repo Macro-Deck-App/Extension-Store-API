@@ -20,22 +20,9 @@ public class GitHubRepositoryService : IGitHubRepositoryService
 
     private readonly Dictionary<string, HttpResponseMessage?> _cache = new();
 
-    private readonly Timer _cacheCleaner = new()
-    {
-        Interval = 1000 * 60 * 10
-    };
-
     public GitHubRepositoryService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _cacheCleaner.Elapsed += CacheCleanerOnElapsed;
-        _cacheCleaner.Start();
-    }
-
-    private void CacheCleanerOnElapsed(object? sender, ElapsedEventArgs e)
-    {
-        _logger.Verbose("Clearing GitHub cache ({NoEntries})", _cache.Count);
-        _cache.Clear();
     }
 
     private static string? GetRepositoryNameFromUrl(string? repositoryUrl)

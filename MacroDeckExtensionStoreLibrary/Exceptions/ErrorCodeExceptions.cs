@@ -8,7 +8,7 @@ public static class ErrorCodeExceptions
         new (500, "Something went wrong. Please contact the Macro Deck team", ErrorCode.InternalError);
     
     public static ErrorCodeException ExtensionManifestNotFoundException() => 
-        new (404, "Extension Manifest was not found", ErrorCode.ExtensionManifestNotFound);
+        new (400, "Extension Manifest was not found", ErrorCode.ExtensionManifestNotFound);
     
     public static ErrorCodeException VersionNotFoundException() => 
         new (404, "Version was not found", ErrorCode.VersionNotFound);
