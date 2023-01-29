@@ -11,4 +11,5 @@ public class ExtensionFileUploadResult
     public string? LicenseName { get; set; }
     public string? LicenseUrl { get; set; }
     public bool Success { get; set; }
+    public bool NewPlugin { get; set; }
 }

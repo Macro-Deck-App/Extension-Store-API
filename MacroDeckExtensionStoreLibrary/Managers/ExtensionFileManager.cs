@@ -164,6 +164,7 @@ public class ExtensionFileManager : IExtensionFileManager
         var result = new ExtensionFileUploadResult
         {
             Success = true,
+            NewPlugin = !extensionExists,
             ExtensionManifest = extensionManifest,
             Md5 = md5,
             IconFileName = iconFileName,
