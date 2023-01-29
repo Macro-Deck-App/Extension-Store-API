@@ -1,3 +1,4 @@
+using System.Globalization;
 using AutoMapper;
 using JetBrains.Annotations;
 using MacroDeckExtensionStoreLibrary.DataAccess.Entities;
@@ -45,6 +46,12 @@ public class ExtensionManager : IExtensionManager
         return extension;
     }
 
+    public Task<string[]> GetCategoriesAsync(Filter filter)
+    {
+        var categories = _extensionRepository.GetCategoriesAsync(filter);
+        return categories;
+    }
+
     public async Task<ExtensionSummary[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
     {
         var topEntities = await _extensionRepository.GetTopDownloadsOfMonth(filter, month, year, count);
@@ -74,6 +81,7 @@ public class ExtensionManager : IExtensionManager
         try
         {
             var extensionEntity = _mapper.Map<ExtensionEntity>(extension);
+            extensionEntity.Category = FixCategoryName(extensionEntity.Category);
             await _extensionRepository.CreateExtensionAsync(extensionEntity);
             _logger.Information("Created extension {PackageId}", extension.PackageId);
         }
@@ -144,5 +152,12 @@ public class ExtensionManager : IExtensionManager
 
         var downloadInfos = _mapper.Map<ExtensionDownloadInfo[]>(downloadInfoEntities);
         return downloadInfos;
+    }
+
+    private string FixCategoryName(string? categoryName)
+    {
+        return string.IsNullOrWhiteSpace(categoryName)
+            ? "No Category"
+            : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(categoryName.Trim());
     }
 }

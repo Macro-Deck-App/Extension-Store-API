@@ -1,19 +1,23 @@
 using MacroDeckExtensionStoreLibrary.Enums;
+// ReSharper disable CollectionNeverUpdated.Global
 #pragma warning disable CS8618
 
-namespace MacroDeckExtensionStoreLibrary.Models;
+namespace MacroDeckExtensionStoreLibrary.Models.ApiV2;
 
-public class Extension
+/// <summary>
+/// DO NOT CHANGE ANYTHING BECAUSE OF COMPATIBILITY REASONS
+/// </summary>
+
+public class ApiV2Extension
 {
     public string PackageId { get; set; }
     public ExtensionType ExtensionType { get; set; }
     public string Name { get; set; }
+    public string Category { get; set; }
     public string Author { get; set; }
     public string Description { get; set; }
-    public string Category { get; set; }
     public string GitHubRepository { get; set; }
     public string DSupportUserId { get; set; }
     public long TotalDownloads { get; set; }
-    
-    public IList<ExtensionFile> ExtensionFiles { get; set; }
+    public IList<ApiV2ExtensionFile> ExtensionFiles { get; set; }
 }

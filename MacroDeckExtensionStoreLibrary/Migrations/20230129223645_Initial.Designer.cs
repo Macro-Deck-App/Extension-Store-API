@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MacroDeckExtensionStoreLibrary.Migrations
 {
     [DbContext(typeof(ExtensionStoreDbContext))]
-    [Migration("20230125214740_Initial")]
+    [Migration("20230129223645_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -67,6 +67,11 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("ext_author");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ext_category");
 
                     b.Property<string>("DSupportUserId")
                         .HasColumnType("text")

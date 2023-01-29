@@ -37,6 +37,9 @@ public class ExtensionEntityConfig : IEntityTypeConfiguration<ExtensionEntity>
             .IsRequired();
         builder.Property(p => p.DSupportUserId)
             .HasColumnName(ColumnPrefix + "discord_author_userid");
+        builder.Property(p => p.Category)
+            .HasColumnName(ColumnPrefix + "category")
+            .IsRequired();
 
         builder.HasMany(p => p.ExtensionFiles)
             .WithOne(e => e.ExtensionEntity)
