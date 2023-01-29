@@ -40,14 +40,26 @@ public static class DependencyInjection
         builder.Services.AddScoped<IGitHubRepositoryLicenseUrlParser, GitHubRepositoryLicenseUrlParser>();
         builder.Services.AddScoped<IGitHubRepositoryService, GitHubRepositoryService>();
         builder.Services.AddScoped<HttpClient>();
-        
+
+        builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwagger();
         builder.Services.AddControllers()
-            .AddJsonOptions(opts =>
+            .AddJsonOptions(opt =>
             {
                 var enumConverter = new JsonStringEnumConverter();
-                opts.JsonSerializerOptions.Converters.Add(enumConverter);
-                opts.JsonSerializerOptions.AllowTrailingCommas = true;
+                opt.JsonSerializerOptions.Converters.Add(enumConverter);
+                opt.JsonSerializerOptions.AllowTrailingCommas = true;
             });
+        builder.Services.AddApiVersioning(opt =>
+        {
+            opt.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(2,0);
+            opt.AssumeDefaultVersionWhenUnspecified = true;
+            opt.ReportApiVersions = true;
+        });
+        builder.Services.AddVersionedApiExplorer(opt =>
+        {
+            opt.GroupNameFormat = "'v'VVV";
+            opt.SubstituteApiVersionInUrl = true;
+        });
     }
 }

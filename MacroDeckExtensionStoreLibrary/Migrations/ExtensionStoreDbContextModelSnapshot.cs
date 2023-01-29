@@ -65,6 +65,11 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                         .HasColumnType("text")
                         .HasColumnName("ext_author");
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ext_category");
+
                     b.Property<string>("DSupportUserId")
                         .HasColumnType("text")
                         .HasColumnName("ext_discord_author_userid");

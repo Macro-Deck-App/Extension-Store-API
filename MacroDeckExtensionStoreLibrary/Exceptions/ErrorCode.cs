@@ -1,4 +1,4 @@
-namespace MacroDeckExtensionStoreLibrary.Enums;
+namespace MacroDeckExtensionStoreLibrary.Exceptions;
 
 public enum ErrorCode
 {

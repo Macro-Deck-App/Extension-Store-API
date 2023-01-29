@@ -26,14 +26,28 @@ public class ExtensionRepository : IExtensionRepository
         return exist;
     }
 
+    public async Task<string?[]> GetCategoriesAsync(Filter filter)
+    {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var categories = await context.ExtensionEntities.AsNoTracking().Where(x =>
+                x.Category != null &&
+                x.ExtensionType == ExtensionType.Plugin && filter.ShowPlugins ||
+                x.ExtensionType == ExtensionType.IconPack && filter.ShowIconPacks)
+            .Select(x => x.Category)
+            .Distinct()
+            .ToArrayAsync();
+        return categories;
+    }
+
     public async Task<PagedData<ExtensionEntity[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination)
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         var filteredExtensionEntities = context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(
-                x =>
-                    filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
-                    filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack)
+                x => filter.Category == null || x.Category == filter.Category &&
+                    (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
+                    filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack))
             .OrderBy(x => x.Name);
         var extensionEntitiesCount = await filteredExtensionEntities.CountAsync();
         var offset = (pagination.Page - 1) * pagination.ItemsPerPage;
@@ -82,6 +96,10 @@ public class ExtensionRepository : IExtensionRepository
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         query = query.ToLower().Trim();
         var filteredMatches = context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads)
+            .Where(
+                x => filter.Category == null || x.Category == filter.Category &&
+                     (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
+                      filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack))
             .Where(x =>
                 x.PackageId.ToLower().Contains(query) ||
                 x.Name.ToLower().Contains(query) ||

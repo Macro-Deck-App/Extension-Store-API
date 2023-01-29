@@ -11,7 +11,8 @@ var app = builder.Build();
 
 app.ConfigureSwagger();
 app.UseAuthorization();
-app.MapControllers();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.MapControllers();
+
 await app.MigrateDatabaseAsync();
 await app.RunAsync();

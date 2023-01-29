@@ -1,5 +1,3 @@
-using MacroDeckExtensionStoreLibrary.Enums;
-
 namespace MacroDeckExtensionStoreLibrary.Exceptions;
 
 public static class ErrorCodeExceptions

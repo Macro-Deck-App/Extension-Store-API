@@ -1,4 +1,5 @@
 using MacroDeckExtensionStoreLibrary.Enums;
+#pragma warning disable CS8618
 
 namespace MacroDeckExtensionStoreLibrary.DataAccess.Entities;
 
@@ -8,6 +9,7 @@ public class ExtensionEntity
     public string PackageId { get; set; }
     public ExtensionType ExtensionType { get; set; }
     public string Name { get; set; }
+    public string? Category { get; set; }
     public string Author { get; set; }
     public string? Description { get; set; }
     public string GitHubRepository { get; set; }

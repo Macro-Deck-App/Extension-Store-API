@@ -21,6 +21,7 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
                     extpackageid = table.Column<string>(name: "ext_package_id", type: "text", nullable: false),
                     exttype = table.Column<int>(name: "ext_type", type: "integer", nullable: false),
                     extname = table.Column<string>(name: "ext_name", type: "text", nullable: false),
+                    extcategory = table.Column<string>(name: "ext_category", type: "text", nullable: false),
                     extauthor = table.Column<string>(name: "ext_author", type: "text", nullable: false),
                     extdescription = table.Column<string>(name: "ext_description", type: "text", nullable: true),
                     extgithubrepository = table.Column<string>(name: "ext_github_repository", type: "text", nullable: false),

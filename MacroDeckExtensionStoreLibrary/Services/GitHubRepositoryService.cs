@@ -1,12 +1,10 @@
 using System.Net;
 using System.Net.Http.Headers;
-using System.Timers;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Markdig;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Timer = System.Timers.Timer;
 
 namespace MacroDeckExtensionStoreLibrary.Services;
 
