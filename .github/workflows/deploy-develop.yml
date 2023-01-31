@@ -6,19 +6,19 @@ on:
     branches: [ "develop" ]
       
 jobs:
-  #tests:
-   # uses: ./.github/workflows/tests.yml
-    #name: Build and test
+  tests:
+    uses: ./.github/workflows/tests.yml
+    name: Build and test
   deploy:
     name: Build and deploy Docker image
-    #needs: [tests]
+    needs: [tests]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file MacroDeckExtensionStoreAPI/Dockerfile --tag suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
     - name: Log into registry
-      uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+      uses: docker/login-action@3da7dc6e2b31f99ef2cb9fb4c50fb0971e0d0139
       with:
         registry: docker.io
         username: suchbyte
