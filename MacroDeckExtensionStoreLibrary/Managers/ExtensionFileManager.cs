@@ -92,6 +92,12 @@ public class ExtensionFileManager : IExtensionFileManager
             var extension = _mapper.Map<Extension>(extensionManifest);
             await _extensionManager.CreateAsync(extension);
         }
+        var versionExists =
+            await _extensionFileRepository.ExistAsync(extensionManifest.PackageId, extensionManifest.Version);
+        if (versionExists)
+        {
+            throw ErrorCodeExceptions.VersionAlreadyExistsException();
+        }
         var finalFileName = GenerateUniqueFileName(extensionManifest);
         var packageFileName = $"{finalFileName}.zip";
         var iconFileName = $"{finalFileName}.png";
@@ -160,19 +166,23 @@ public class ExtensionFileManager : IExtensionFileManager
         {
             _logger.Warning(ex, "Cannot get license of {PackageId}", extensionManifest.PackageId);
         }
-        
+
+        var currentFile =
+            await _extensionFileRepository.GetFileAsync(extensionManifest.PackageId,
+                extensionManifest.TargetPluginApiVersion);
+
         var result = new ExtensionFileUploadResult
         {
             Success = true,
             NewPlugin = !extensionExists,
             ExtensionManifest = extensionManifest,
             Md5 = md5,
-            IconFileName = iconFileName,
-            PackageFileName = packageFileName,
             LicenseName = license.Name,
             LicenseUrl = license.Url,
             ReadmeHtml = readmeHtml,
-            Description = description
+            Description = description,
+            NewVersion = extensionManifest.Version,
+            CurrentVersion = currentFile?.Version
         };
 
         var extensionFileEntity = _mapper.Map<ExtensionFileEntity>(result);

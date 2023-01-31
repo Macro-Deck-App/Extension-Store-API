@@ -108,6 +108,7 @@ public class GitHubRepositoryService : IGitHubRepositoryService
         var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
         var productValue = new ProductInfoHeaderValue("MacroDeckExtensionStore", "1.0");
         request.Headers.UserAgent.Add(productValue);
+        _httpClient.Timeout = TimeSpan.FromSeconds(30);
         var response = await _httpClient.SendAsync(request);
         _cache.Add(requestUrl, response);
         return response;

@@ -22,7 +22,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         var exist = await context.ExtensionFileEntities.AsNoTracking().Include(x => x.ExtensionEntity)
-            .AnyAsync(x => x.Version == version);
+            .AnyAsync(x => x.ExtensionEntity.PackageId == packageId && x.Version == version);
         return exist;
     }
 
@@ -49,11 +49,11 @@ public class ExtensionFileRepository : IExtensionFileRepository
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
         if (version.ToLower() == "latest")
         {
-            var latestExtensionFileEntity = await context.ExtensionFileEntities.Include(x => x.ExtensionEntity).AsNoTracking()
+            var latestExtensionFileEntity = await context.ExtensionFileEntities.Include(x => x.ExtensionEntity)
+                .AsNoTracking()
                 .Where(x => x.ExtensionEntity.PackageId == packageId &&
                             (!targetApiVersion.HasValue || x.MinApiVersion <= targetApiVersion))
-                .OrderBy(x => x.UploadDateTime)
-                .FirstAsync();
+                .OrderByDescending(x => x.Version).Take(1).FirstOrDefaultAsync();
             return latestExtensionFileEntity;
         }
 
