@@ -10,17 +10,17 @@ namespace MacroDeckExtensionStoreLibrary.Services;
 
 public class GitHubRepositoryService : IGitHubRepositoryService
 {
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger = Log.ForContext<GitHubRepositoryService>();
-    private readonly HttpClient _httpClient;
 
     private const string GitHubApi = "https://api.github.com";
     private const string RawGitHubUrl = "https://raw.githubusercontent.com";
 
     private readonly Dictionary<string, HttpResponseMessage?> _cache = new();
 
-    public GitHubRepositoryService(HttpClient httpClient)
+    public GitHubRepositoryService(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
     }
 
     private static string? GetRepositoryNameFromUrl(string? repositoryUrl)
@@ -108,8 +108,9 @@ public class GitHubRepositoryService : IGitHubRepositoryService
         var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
         var productValue = new ProductInfoHeaderValue("MacroDeckExtensionStore", "1.0");
         request.Headers.UserAgent.Add(productValue);
-        _httpClient.Timeout = TimeSpan.FromSeconds(30);
-        var response = await _httpClient.SendAsync(request);
+        using var httpClient = _httpClientFactory.CreateClient();
+        httpClient.Timeout = TimeSpan.FromSeconds(30);
+        var response = await httpClient.SendAsync(request);
         _cache.Add(requestUrl, response);
         return response;
     }
