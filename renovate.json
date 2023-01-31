@@ -4,10 +4,11 @@
     "config:base"
   ],
   "baseBranches": ["develop"],
-  "schedule": ["* 0 * * MON"],
+  "schedule": ["on monday at 0am"],
   "packageRules": [
     {
-      "stabilityDays": 3
+      "matchPackageNames": ["nuget"],
+      "stabilityDays": 14
     }
   ]
 }
