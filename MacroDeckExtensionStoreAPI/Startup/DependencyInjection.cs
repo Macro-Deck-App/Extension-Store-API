@@ -21,6 +21,8 @@ public static class DependencyInjection
         builder.ConfigureSerilog();
         Paths.EnsureDirectoriesCreated();
         
+        builder.Services.AddHttpClient();
+        
         var appConfig = await AppConfig.LoadAsync(Paths.AppConfigPath);
         builder.Services.AddSingleton(appConfig);
         
