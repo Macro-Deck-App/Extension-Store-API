@@ -4,7 +4,7 @@
     "config:base"
   ],
   "baseBranches": ["develop"],
-  "schedule": ["on monday at 0am"],
+  "schedule": ["every monday"],
   "packageRules": [
     {
       "matchPackageNames": ["nuget"],
