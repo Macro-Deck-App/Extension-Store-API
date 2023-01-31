@@ -176,6 +176,8 @@ public class ExtensionFileManager : IExtensionFileManager
             Success = true,
             NewPlugin = !extensionExists,
             ExtensionManifest = extensionManifest,
+            PackageFileName = packageFileName,
+            IconFileName = iconFileName,
             Md5 = md5,
             LicenseName = license.Name,
             LicenseUrl = license.Url,
