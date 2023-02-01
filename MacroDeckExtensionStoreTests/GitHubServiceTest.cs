@@ -1,19 +1,18 @@
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Services;
+using Moq;
 
 namespace MacroDeckExtensionStoreTests;
 
 public class GitHubServiceTest
 {
-    /*private readonly IGitHubRepositoryService _repositoryService;
+    private readonly IGitHubRepositoryService _repositoryService;
 
     public GitHubServiceTest()
     {
         var mockFactory = new Mock<IHttpClientFactory>();
-        var clientHandlerStub = new DelegatingHandlerStub();
-        var client = new HttpClient(clientHandlerStub);
-        mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
-        IHttpClientFactory httpClientFactory = mockFactory.Object;
+        mockFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
+        var httpClientFactory = mockFactory.Object;
         _repositoryService = new GitHubRepositoryService(httpClientFactory);
     }
 
@@ -49,5 +48,5 @@ public class GitHubServiceTest
     {
         var readMe = _repositoryService.GetReadmeAsync(repositoryUrl).Result;
         Console.WriteLine(readMe);
-    }*/
+    }
 }
