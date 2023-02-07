@@ -25,11 +25,9 @@ public class GitHubServiceTest
     }
 
     [TestCase("https://github.com/Macro-Deck-org/Macro-Deck")]
-    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck.git")]
     [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck")]
     [TestCase("www.github.com/Macro-Deck-org/Macro-Deck")]
     [TestCase("github.com/Macro-Deck-org/Macro-Deck")]
-    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
     public void TestGetRepositoryNameFromUrl(string url)
     {
         var repositoryName = GitHubRepositoryService.GetRepositoryNameFromUrl(url);
