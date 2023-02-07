@@ -24,10 +24,26 @@ public class GitHubServiceTest
         Assert.That(description, Is.EqualTo("Macro Deck converts your phone, tablet or any other device with an up-to-date internet browser into an powerful remote macro pad to perform single actions or even multiple actions with just one tap."));
     }
 
-    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck")]
-    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck")]
-    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck")]
     [TestCase("github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("http://github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("http://github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("http://github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    [TestCase("http://github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
     public void TestGetRepositoryNameFromUrl(string url)
     {
         var repositoryName = GitHubRepositoryService.GetRepositoryNameFromUrl(url);

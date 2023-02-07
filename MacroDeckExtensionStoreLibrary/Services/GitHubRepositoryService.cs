@@ -31,11 +31,11 @@ public class GitHubRepositoryService : IGitHubRepositoryService
         {
             return string.Empty;
         }
-        const string pattern = @"github\.com\/(.*)\/(.*)(?:\.git)?";
+        const string pattern = @"(?:https?://)?(?:www\.)?github\.com/([\w-]+/[\w-]+)";
         var match = Regex.Match(repositoryUrl, pattern);
         if (match.Success)
         {
-            return match.Groups[1].Value + "/" + match.Groups[2].Value;
+            return match.Groups[1].Value;
         }
         return string.Empty;
     }
