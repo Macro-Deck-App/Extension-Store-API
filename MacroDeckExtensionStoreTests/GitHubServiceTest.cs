@@ -24,6 +24,18 @@ public class GitHubServiceTest
         Assert.That(description, Is.EqualTo("Macro Deck converts your phone, tablet or any other device with an up-to-date internet browser into an powerful remote macro pad to perform single actions or even multiple actions with just one tap."));
     }
 
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    public void TestGetRepositoryNameFromUrl(string url)
+    {
+        var repositoryName = GitHubRepositoryService.GetRepositoryNameFromUrl(url);
+        Assert.That(repositoryName, Is.EqualTo("Macro-Deck-org/Macro-Deck"));
+    }
+
     [TestCase("https://github.com/SuchByte/Macro-Deck-Twitch-Plugin")]
     [TestCase("https://github.com/SuchByte/Macro-Deck-Windows-Utils-Plugin")]
     public void LicenseTest(string? repositoryUrl)

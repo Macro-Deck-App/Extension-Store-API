@@ -40,6 +40,14 @@ public class ExtensionRepository : IExtensionRepository
         return categories;
     }
 
+    public async Task<ExtensionEntity[]> GetAllExtensions()
+    {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
+        var extensionEntities = await context.ExtensionEntities.AsNoTracking().ToArrayAsync();
+        return extensionEntities;
+    }
+
     public async Task<PagedData<ExtensionEntity[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination)
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();

@@ -7,6 +7,7 @@ public interface IExtensionRepository
 {
     public Task<bool> ExistAsync(string packageId);
     public Task<string?[]> GetCategoriesAsync(Filter filter);
+    public Task<ExtensionEntity[]> GetAllExtensions();
     public Task<PagedData<ExtensionEntity[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination);
     public Task<ExtensionEntity[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count);
     public Task<ExtensionEntity?> GetByPackageIdAsync(string packageId);

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using MacroDeckExtensionStoreLibrary.Interfaces;
 using MacroDeckExtensionStoreLibrary.Models;
 using Markdig;
@@ -24,13 +25,19 @@ public class GitHubRepositoryService : IGitHubRepositoryService
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
     }
 
-    private static string? GetRepositoryNameFromUrl(string? repositoryUrl)
+    public static string? GetRepositoryNameFromUrl(string? repositoryUrl)
     {
-        repositoryUrl = repositoryUrl?.Replace("www.", "")
-            .Replace("https://", "")
-            .Replace("github.com/", "")
-            .Replace(".git", "");
-        return repositoryUrl;
+        if (string.IsNullOrWhiteSpace(repositoryUrl))
+        {
+            return string.Empty;
+        }
+        const string pattern = @"github\.com\/(.*)\/(.*)(?:\.git)?";
+        var match = Regex.Match(repositoryUrl, pattern);
+        if (match.Success)
+        {
+            return match.Groups[1].Value + "/" + match.Groups[2].Value;
+        }
+        return string.Empty;
     }
 
     public async Task<string?> GetDefaultBranchName(string? repositoryUrl)

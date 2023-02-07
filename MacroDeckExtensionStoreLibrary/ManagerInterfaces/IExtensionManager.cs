@@ -11,6 +11,7 @@ public interface IExtensionManager
     public Task<bool> ExistsAsync(string packageId);
     public Task<PagedData<ExtensionSummary[]>> SearchAsync(string query, Filter filter, Pagination pagination);
     public Task CreateAsync(Extension extension);
+    public Task DeleteAllAsync();
     public Task DeleteAsync(string packageId);
     public Task<FileStream> GetIconStreamAsync(string packageId);
     public Task CountDownloadAsync(string packageId, string version);

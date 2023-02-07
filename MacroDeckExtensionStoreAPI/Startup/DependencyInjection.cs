@@ -38,6 +38,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IExtensionFileRepository, ExtensionFileRepository>();
         builder.Services.AddScoped<IExtensionManager, ExtensionManager>();
         builder.Services.AddScoped<IExtensionFileManager, ExtensionFileManager>();
+        builder.Services.AddSingleton<IFileManager, FileManager>();
 
         builder.Services.AddScoped<IGitHubRepositoryLicenseUrlParser, GitHubRepositoryLicenseUrlParser>();
         builder.Services.AddScoped<IGitHubRepositoryService, GitHubRepositoryService>();

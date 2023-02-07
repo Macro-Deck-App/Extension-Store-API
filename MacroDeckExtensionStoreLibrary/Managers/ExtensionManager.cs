@@ -16,14 +16,17 @@ public class ExtensionManager : IExtensionManager
     private readonly ILogger _logger = Log.ForContext<ExtensionManager>();
     private readonly IExtensionRepository _extensionRepository;
     private readonly IExtensionFileRepository _extensionFileRepository;
+    private readonly IFileManager _fileManager;
     private readonly IMapper _mapper;
 
     public ExtensionManager(IExtensionRepository extensionRepository,
         IExtensionFileRepository extensionFileRepository,
+        IFileManager fileManager,
         IMapper mapper)
     {
         _extensionRepository = extensionRepository;
         _extensionFileRepository = extensionFileRepository;
+        _fileManager = fileManager;
         _mapper = mapper;
     }
 
@@ -91,15 +94,33 @@ public class ExtensionManager : IExtensionManager
         }
     }
 
+    public async Task DeleteAllAsync()
+    {
+        var extensions = await _extensionRepository.GetAllExtensions();
+        foreach (var extension in extensions)
+        {
+            await DeleteAsync(extension.PackageId);
+        }
+    }
+
     public async Task DeleteAsync(string packageId)
     {
         try
         {
+            var extensionFileEntities = await _extensionFileRepository.GetFilesAsync(packageId);
+            foreach (var extensionFileEntity in extensionFileEntities)
+            {
+                _fileManager.DeleteExtensionFile(
+                    extensionFileEntity.PackageFileName,
+                    extensionFileEntity.IconFileName);
+                await _extensionFileRepository.DeleteFileAsync(packageId, extensionFileEntity.Version);
+            }
             await _extensionRepository.DeleteExtensionAsync(packageId);
         }
         catch (Exception ex)
         {
             _logger.Fatal(ex, "Failed to delete extension {PackageId}", packageId);
+            throw;
         }
     }
 
