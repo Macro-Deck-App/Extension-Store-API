@@ -8,7 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 await builder.ConfigureAsync();
 
 var app = builder.Build();
-
+app.UseCors(x => x
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .SetIsOriginAllowed(origin => true) // allow any origin
+    .AllowCredentials());
 app.ConfigureSwagger();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
