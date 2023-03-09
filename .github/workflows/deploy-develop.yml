@@ -26,7 +26,7 @@ jobs:
     - name: Push the Docker image
       run: docker push suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
     - name: Updating the image on the server
-      uses: appleboy/ssh-action@v0.1.7
+      uses: appleboy/ssh-action@v0.1.8
       with:
         host: ${{ secrets.DOCKER_HOST }}
         username: ${{ secrets.GITHUBWORKFLOWS_USER }}
