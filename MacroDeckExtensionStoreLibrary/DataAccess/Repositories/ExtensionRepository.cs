@@ -52,10 +52,12 @@ public class ExtensionRepository : IExtensionRepository
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var context = scope.ServiceProvider.GetRequiredService<ExtensionStoreDbContext>();
-        var filteredExtensionEntities = context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads).Where(
-                x => filter.Category == null || x.Category == filter.Category &&
-                    (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
-                    filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack))
+        var filteredExtensionEntities = context.ExtensionEntities.AsNoTracking()
+            .Where(
+                x => (filter.Category == null || x.Category == filter.Category) &&
+                     (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
+                      filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack))
+            .Include(x => x.Downloads)
             .OrderBy(x => x.Name);
         var extensionEntitiesCount = await filteredExtensionEntities.CountAsync();
         var offset = (pagination.Page - 1) * pagination.ItemsPerPage;
@@ -105,7 +107,7 @@ public class ExtensionRepository : IExtensionRepository
         query = query.ToLower().Trim();
         var filteredMatches = context.ExtensionEntities.AsNoTracking().Include(x => x.Downloads)
             .Where(
-                x => filter.Category == null || x.Category == filter.Category &&
+                x => (filter.Category == null || x.Category == filter.Category) &&
                      (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
                       filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack))
             .Where(x =>
