@@ -18,7 +18,7 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file MacroDeckExtensionStoreAPI/Dockerfile --tag suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
     - name: Log into registry
-      uses: docker/login-action@ec9cdf07d570632daeb912f5b2099cb9ec1d01e6
+      uses: docker/login-action@40891eba8c2bcd1309b07ba8b11232f313e86779
       with:
         registry: docker.io
         username: suchbyte
