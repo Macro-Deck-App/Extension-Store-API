@@ -6,6 +6,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeckExtensionStoreLibr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeckExtensionStoreTests", "MacroDeckExtensionStoreTests\MacroDeckExtensionStoreTests.csproj", "{22D634B0-1302-4566-B427-4F7E88812B5D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{01ECF997-D820-4EB0-8E70-24FC08BBF49B}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+		renovate.json = renovate.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{06CD4758-F7EE-437A-9AEC-1EDB619E86A4}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\deploy-develop.yml = .github\workflows\deploy-develop.yml
+		.github\workflows\tests.yml = .github\workflows\tests.yml
+		.github\workflows\deploy-production.yml = .github\workflows\deploy-production.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

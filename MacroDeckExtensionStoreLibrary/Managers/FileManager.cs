@@ -1,5 +1,4 @@
 using MacroDeckExtensionStoreLibrary.ManagerInterfaces;
-using MacroDeckExtensionStoreLibrary.Models;
 using Serilog;
 
 namespace MacroDeckExtensionStoreLibrary.Managers;

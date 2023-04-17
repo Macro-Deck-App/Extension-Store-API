@@ -192,7 +192,8 @@ public class ExtensionFileManager : IExtensionFileManager
         try
         {
             await _extensionFileRepository.CreateFileAsync(extensionManifest.PackageId, extensionFileEntity);
-        } catch
+        }
+        catch
         {
             SafeDelete.Delete(finalPackageFilePath);
             SafeDelete.Delete(finalIconPath);

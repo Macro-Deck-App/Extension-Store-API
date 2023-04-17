@@ -26,10 +26,13 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
             BearerFormat = "JWT",
             Description = "API Key Authorization header",
         });
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
             {
-                new OpenApiSecurityScheme {
-                    Reference = new OpenApiReference {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
                         Type = ReferenceType.SecurityScheme,
                         Id = "Bearer"
                     }

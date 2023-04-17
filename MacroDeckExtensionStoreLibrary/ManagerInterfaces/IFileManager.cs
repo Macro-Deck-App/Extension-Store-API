@@ -1,5 +1,3 @@
-using MacroDeckExtensionStoreLibrary.Models;
-
 namespace MacroDeckExtensionStoreLibrary.ManagerInterfaces;
 
 public interface IFileManager
