@@ -1,15 +1,26 @@
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+
 namespace MacroDeckExtensionStoreAPI.Startup;
 
 public static class SwaggerConfiguration
 {
+    public static void AddSwagger(this IServiceCollection services)
+    {
+        services.AddSwaggerGen();
+        services.ConfigureOptions<ConfigureSwaggerOptions>();
+    }
 
     public static void ConfigureSwagger(this WebApplication app)
     { 
+        var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
         app.UseSwagger();
-        app.UseSwaggerUI(c =>
+        app.UseSwaggerUI(options =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Macro Deck Extension Store API");
-            c.RoutePrefix = "docs";
+            foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions.Reverse())
+            {
+                options.SwaggerEndpoint($"{description.GroupName}/swagger.json",
+                    description.GroupName);
+            }
         });
     }
     

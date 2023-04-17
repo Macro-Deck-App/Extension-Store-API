@@ -1,36 +1,58 @@
 using MacroDeckExtensionStoreLibrary.Interfaces;
-using MacroDeckExtensionStoreLibrary.Parsers;
 using MacroDeckExtensionStoreLibrary.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using NUnit.Framework.Internal;
+using Moq;
 
 namespace MacroDeckExtensionStoreTests;
 
 public class GitHubServiceTest
 {
-    private GitHubRepositoryLicenseUrlParser _gitHubRepositoryLicenseUrlParser;
-    private IGitHubRepositoryService _repositoryService;
-    
-    [SetUp]
-    public void Setup()
+    private readonly IGitHubRepositoryService _repositoryService;
+
+    public GitHubServiceTest()
     {
-        var httpClient = new HttpClient();
-        ILogger<GitHubRepositoryService> logger = new NullLogger<GitHubRepositoryService>();
-        _gitHubRepositoryLicenseUrlParser = new GitHubRepositoryLicenseUrlParser();
-        _repositoryService = new GitHubRepositoryService(logger, _gitHubRepositoryLicenseUrlParser, httpClient);
+        var mockFactory = new Mock<IHttpClientFactory>();
+        mockFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
+        var httpClientFactory = mockFactory.Object;
+        _repositoryService = new GitHubRepositoryService(httpClientFactory);
     }
 
-    [TestCase("https://github.com/SuchByte/Macro-Deck-Twitch-Plugin")]
-    public void ParserTest(string repositoryUrl)
+    [Test]
+    public async Task DescriptionTest()
     {
-        var parsed = _gitHubRepositoryLicenseUrlParser.Parse(repositoryUrl, "main");
-        Assert.That(parsed, Is.EqualTo("https://raw.githubusercontent.com/SuchByte/Macro-Deck-Twitch-Plugin/main/LICENSE"));
+        const string repositoryUrl = "https://github.com/Macro-Deck-org/Macro-Deck";
+        var description = await _repositoryService.GetDescriptionAsync(repositoryUrl);
+        Assert.That(description, Is.EqualTo("Macro Deck converts your phone, tablet or any other device with an up-to-date internet browser into an powerful remote macro pad to perform single actions or even multiple actions with just one tap."));
+    }
+
+    [TestCase("github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("http://github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck")]
+    [TestCase("github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("http://github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck.git")]
+    [TestCase("github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("http://github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck/unnecessary_parameter")]
+    [TestCase("github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    [TestCase("www.github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    [TestCase("http://github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    [TestCase("https://github.com/Macro-Deck-org/Macro-Deck.git/unnecessary_parameter")]
+    public void TestGetRepositoryNameFromUrl(string url)
+    {
+        var repositoryName = GitHubRepositoryService.GetRepositoryNameFromUrl(url);
+        Assert.That(repositoryName, Is.EqualTo("Macro-Deck-org/Macro-Deck"));
     }
 
     [TestCase("https://github.com/SuchByte/Macro-Deck-Twitch-Plugin")]
     [TestCase("https://github.com/SuchByte/Macro-Deck-Windows-Utils-Plugin")]
-    public void LicenseTest(string repositoryUrl)
+    public void LicenseTest(string? repositoryUrl)
     {
         var license = _repositoryService.GetLicenseAsync(repositoryUrl).Result;
         Assert.Multiple(() =>
@@ -41,14 +63,14 @@ public class GitHubServiceTest
     }
 
     [TestCase("https://github.com/SuchByte/Macro-Deck-Twitch-Plugin")]
-    public void DefaultBranchTest(string repositoryUrl)
+    public void DefaultBranchTest(string? repositoryUrl)
     {
         var defaultBranch = _repositoryService.GetDefaultBranchName(repositoryUrl).Result;
         Assert.That(defaultBranch, Is.EqualTo("main"));
     }
     
     [TestCase("https://github.com/SuchByte/Macro-Deck-Twitch-Plugin")]
-    public void ReadMeTest(string repositoryUrl)
+    public void ReadMeTest(string? repositoryUrl)
     {
         var readMe = _repositoryService.GetReadmeAsync(repositoryUrl).Result;
         Console.WriteLine(readMe);

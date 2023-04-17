@@ -17,6 +17,12 @@ public class ExtensionManifest
      [JsonPropertyName("author")]
      public string Author { get; set; }
 
+     [JsonPropertyName("category")]
+     public string Category { get; set; }
+
+     [JsonPropertyName("author-discord-userid")]
+     public string AuthorDiscordUserId { get; set; }
+
      [JsonPropertyName("repository")]
      public string Repository { get; set; } = "";
 
@@ -27,7 +33,7 @@ public class ExtensionManifest
      public string Version { get; set; }
 
      [JsonPropertyName("target-plugin-api-version")]
-     public int TargetPluginAPIVersion { get; set; } = 31;
+     public int TargetPluginApiVersion { get; set; } = 31;
 
      [JsonPropertyName("dll")]
      public string Dll { get; set; } = "";
