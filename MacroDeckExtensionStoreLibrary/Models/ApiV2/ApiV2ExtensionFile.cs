@@ -16,5 +16,4 @@ public class ApiV2ExtensionFile
     public string LicenseName { get; set; }
     public string LicenseUrl { get; set; }
     public DateTime UploadDateTime { get; set; } = DateTime.Now;
-    
 }

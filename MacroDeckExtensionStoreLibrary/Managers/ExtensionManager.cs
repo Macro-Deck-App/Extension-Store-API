@@ -49,6 +49,18 @@ public class ExtensionManager : IExtensionManager
         return extension;
     }
 
+    public async Task<ExtensionSummary> GetSummaryByPackageIdAsync(string packageId)
+    {
+        var extensionEntity = await _extensionRepository.GetByPackageIdAsync(packageId);
+        if (extensionEntity == null)
+        {
+            throw ErrorCodeExceptions.PackageIdNotFoundException();
+        }
+
+        var extension = _mapper.Map<ExtensionSummary>(extensionEntity);
+        return extension;
+    }
+
     public Task<string[]> GetCategoriesAsync(Filter filter)
     {
         var categories = _extensionRepository.GetCategoriesAsync(filter);

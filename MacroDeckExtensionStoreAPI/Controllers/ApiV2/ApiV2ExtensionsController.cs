@@ -70,6 +70,14 @@ public class ApiV2ExtensionsController : ControllerBase
         var apiV2Extension = _mapper.Map<ApiV2Extension>(extension);
         return Ok(apiV2Extension);
     }
+    
+    [HttpGet("{packageId}/summary")]
+    public async Task<ActionResult<ApiV2ExtensionSummary>> GetExtensionSummaryByPackageIdAsync(string packageId)
+    {
+        var extension = await _extensionManager.GetSummaryByPackageIdAsync(packageId);
+        var apiV2Extension = _mapper.Map<ApiV2ExtensionSummary>(extension);
+        return Ok(apiV2Extension);
+    }
 
     [HttpGet("icon/{packageId}")]
     public async Task<ActionResult<FileStream>> GetIconAsync(string packageId)
