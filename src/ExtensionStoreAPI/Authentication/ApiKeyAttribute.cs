@@ -1,34 +1,31 @@
-using ExtensionStoreAPI.Config;
+using ExtensionStoreAPI.Core.Configuration;
+using ExtensionStoreAPI.Core.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace ExtensionStoreAPI.Authentication;
 
 [AttributeUsage(validOn: AttributeTargets.Method)]
-public class ApiKeyAttribute : Attribute, IAsyncActionFilter
+public class ApiKeyAttribute : Attribute, IAuthorizationFilter
 {
-    private const string HeaderApiKeyName = "Authorization";
+    private const string AuthorizationHeader = "x-admin-token";
     
-    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    public void OnAuthorization(AuthorizationFilterContext context)
     {
-        if (!context.HttpContext.Request.Headers.TryGetValue(HeaderApiKeyName, out var extractedApiKey))
+        if (!context.HttpContext.Request.Headers.TryGetValue(AuthorizationHeader, out var adminToken)
+            || adminToken.Count > 1)
         {
-            context.Result = new ContentResult()
-            {
-                StatusCode = StatusCodes.Status401Unauthorized
-            };
+            context.Result = new UnauthorizedResult();
             return;
         }
-        var appConfig = context.HttpContext.RequestServices.GetRequiredService<AppConfig>();
-        var apiKey = $"Bearer {appConfig.ApiToken}";
-        if (!apiKey.Equals(extractedApiKey))
+
+        context.HttpContext.Request.Headers.Remove(AuthorizationHeader);
+
+        if (ExtensionStoreApiConfig.AdminAuthenticationToken.EqualsCryptographically(adminToken.ToString()))
         {
-            context.Result = new ContentResult()
-            {
-                StatusCode = StatusCodes.Status403Forbidden
-            };
             return;
         }
-        await next();
+        
+        context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
     }
 }

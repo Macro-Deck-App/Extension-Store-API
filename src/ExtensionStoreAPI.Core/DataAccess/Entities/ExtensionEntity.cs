@@ -12,6 +12,6 @@ public class ExtensionEntity : BaseCreatedUpdatedEntity
     public string? Description { get; set; }
     public string GitHubRepository { get; set; } = string.Empty;
     public string? DSupportUserId { get; set; }
-    public ICollection<ExtensionFileEntity> ExtensionFiles { get; set; } = new List<ExtensionFileEntity>();
-    public ICollection<ExtensionDownloadInfoEntity> Downloads { get; set; } = new List<ExtensionDownloadInfoEntity>();
+    public ICollection<ExtensionFileEntity>? ExtensionFiles { get; set; }
+    public ICollection<ExtensionDownloadInfoEntity>? Downloads { get; set; }
 }

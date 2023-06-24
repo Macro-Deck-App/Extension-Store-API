@@ -1,22 +1,41 @@
+using ExtensionStoreAPI.Core.Configuration;
+using ExtensionStoreAPI.Core.Helper;
 using ExtensionStoreAPI.Extensions;
-using ExtensionStoreAPI.Middleware;
-using ExtensionStoreAPI.Startup;
+using ExtensionStoreAPI.Setup;
+using Serilog;
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+namespace ExtensionStoreAPI;
 
-var builder = WebApplication.CreateBuilder(args);
-await builder.ConfigureAsync();
+public static class Program
+{
+    public static async Task Main(string[] args)
+    {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
-var app = builder.Build();
-app.UseCors(x => x
-    .AllowAnyMethod()
-    .AllowAnyHeader()
-    .SetIsOriginAllowed(origin => true) // allow any origin
-    .AllowCredentials());
-app.ConfigureSwagger();
-app.UseAuthorization();
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.MapControllers();
+        await ExtensionStoreApiConfig.Initialize();
+        
+        var app = Host.CreateDefaultBuilder(args)
+            .ConfigureSerilog()
+            .ConfigureWebHostDefaults(hostBuilder =>
+            {
+                hostBuilder.UseStartup<Startup>();
+                hostBuilder.ConfigureKestrel(options =>
+                {
+                    options.ListenAnyIP(EnvironmentHelper.HostingPort);
+                });
+            }).Build();
 
-await app.MigrateDatabaseAsync();
-await app.RunAsync();
+        await app.MigrateDatabaseAsync();
+        await app.RunAsync();
+    }
+    
+    private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        Log.Logger.Fatal(e.ExceptionObject as Exception,
+            "Unhandled exception {Terminating}",
+            e.IsTerminating
+                ? "Terminating"
+                : "Not terminating");
+    }
+}

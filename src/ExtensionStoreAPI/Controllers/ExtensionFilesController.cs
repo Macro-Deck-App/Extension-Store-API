@@ -1,6 +1,6 @@
 using ExtensionStoreAPI.Authentication;
+using ExtensionStoreAPI.Core.DataTypes.Response;
 using ExtensionStoreAPI.Core.ManagerInterfaces;
-using ExtensionStoreAPI.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExtensionStoreAPI.Controllers;
@@ -16,7 +16,7 @@ public class ExtensionFilesController : Controller
         _extensionFileManager = extensionFileManager;
     }
     
-    [HttpPost("Upload")]
+    [HttpPost("upload")]
     [RequestFormLimits(MultipartBodyLengthLimit = 209715200)]
     [RequestSizeLimit(209715200)]
     [ApiKey]

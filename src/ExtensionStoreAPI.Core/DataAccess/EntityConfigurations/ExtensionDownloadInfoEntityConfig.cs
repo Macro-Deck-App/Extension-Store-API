@@ -9,7 +9,7 @@ public class ExtensionDownloadInfoEntityConfig : BaseCreatedEntityConfig<Extensi
     public ExtensionDownloadInfoEntityConfig()
     {
         Table = "extension_downloads";
-        ColumnPrefix = "dl_";
+        ColumnPrefix = "d_";
     }
 
     public override void Configure(EntityTypeBuilder<ExtensionDownloadInfoEntity> builder)

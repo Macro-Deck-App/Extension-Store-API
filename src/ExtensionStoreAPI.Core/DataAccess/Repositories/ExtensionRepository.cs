@@ -1,8 +1,10 @@
 using ExtensionStoreAPI.Core.DataAccess.Entities;
 using ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
+using ExtensionStoreAPI.Core.DataTypes.Request;
+using ExtensionStoreAPI.Core.DataTypes.Response;
 using ExtensionStoreAPI.Core.Enums;
 using ExtensionStoreAPI.Core.Exceptions;
-using ExtensionStoreAPI.Core.Models;
+using ExtensionStoreAPI.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExtensionStoreAPI.Core.DataAccess.Repositories;
@@ -16,15 +18,15 @@ public class ExtensionRepository : IExtensionRepository
         _context = context;
     }
 
-    public async Task<bool> ExistAsync(string packageId)
+    public async ValueTask<bool> ExistAsync(string packageId)
     {
-        return await _context.Set<ExtensionEntity>().AsNoTracking()
+        return await _context.GetNoTrackingSet<ExtensionEntity>()
             .AnyAsync(x => x.PackageId == packageId);
     }
 
-    public async Task<string[]> GetCategoriesAsync(Filter filter)
+    public async ValueTask<string[]> GetCategoriesAsync(Filter filter)
     {
-        return await _context.Set<ExtensionEntity>().AsNoTracking()
+        return await _context.GetNoTrackingSet<ExtensionEntity>()
             .Where(x =>
                 x.Category != null &&
                 x.ExtensionType == ExtensionType.Plugin && filter.ShowPlugins
@@ -34,103 +36,58 @@ public class ExtensionRepository : IExtensionRepository
             .ToArrayAsync();
     }
 
-    public async Task<ExtensionEntity[]> GetAllExtensions()
+    public async ValueTask<ExtensionEntity?> GetByPackageIdAsync(string packageId)
     {
-        return await _context.Set<ExtensionEntity>().AsNoTracking().ToArrayAsync();
-    }
-
-    public async Task<PagedData<ExtensionEntity[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination)
-    {
-        var filteredExtensionEntities = _context.Set<ExtensionEntity>().AsNoTracking()
-            .Where(
-                x => (filter.Category == null || x.Category == filter.Category) &&
-                     (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
-                      filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack))
-            .Include(x => x.Downloads)
-            .OrderBy(x => x.Name);
-        
-        var extensionEntitiesCount = await filteredExtensionEntities.CountAsync();
-        var offset = (pagination.Page - 1) * pagination.ItemsPerPage;
-        var pagedExtensionEntities = 
-            await filteredExtensionEntities.Skip(offset)
-            .Take(pagination.ItemsPerPage).ToArrayAsync();
-
-        return new PagedData<ExtensionEntity[]>
-        {
-            TotalItemsCount = extensionEntitiesCount,
-            CurrentPage = pagination.Page,
-            ItemsPerPage = pagination.ItemsPerPage,
-            Data = pagedExtensionEntities
-        };
-    }
-
-    public async Task<ExtensionEntity[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
-    {
-        return await _context.Set<ExtensionEntity>().AsNoTracking()
-            .Include(x => x.Downloads)
-            .Where(x => filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin
-                        || filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack)
-            .OrderByDescending(d =>
-                d.Downloads.Count(y => y.CreatedTimestamp.Year == year && y.CreatedTimestamp.Month == month))
-            .Take(count)
-            .ToArrayAsync();
-    }
-
-    public async Task<ExtensionEntity?> GetByPackageIdAsync(string packageId)
-    {
-        return await _context.Set<ExtensionEntity>().AsNoTracking()
+        return await _context.GetNoTrackingSet<ExtensionEntity>()
             .Include(x => x.ExtensionFiles)
             .Include(x => x.Downloads)
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
     }
 
-    public async Task<PagedData<ExtensionEntity[]>> SearchAsync(string query, Filter filter, Pagination pagination)
+    public async ValueTask<PagedList<ExtensionEntity>> GetAllAsync(
+        string? searchString,
+        Filter? filter,
+        Pagination pagination)
     {
-        query = query.ToLower().Trim();
-        var offset = (pagination.Page - 1) * pagination.ItemsPerPage;
-        
-        var results = await _context.Set<ExtensionEntity>().AsNoTracking().Include(x => x.Downloads)
-            .Where(
+        var query = _context.GetNoTrackingSet<ExtensionEntity>().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            searchString = searchString.ToLower().Trim();
+
+            query = query.Where(x =>
+                x.PackageId.ToLower().Contains(searchString) ||
+                x.Name.ToLower().Contains(searchString) ||
+                x.Author.ToLower().Contains(searchString));
+        }
+
+        if (filter is not null)
+        {
+            query = query.Where(
                 x => (filter.Category == null || x.Category == filter.Category) &&
                      (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
-                      filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack))
-            .Where(x =>
-                x.PackageId.ToLower().Contains(query) ||
-                x.Name.ToLower().Contains(query) ||
-                x.Author.ToLower().Contains(query) ||
-                (x.DSupportUserId != null && x.DSupportUserId.ToLower().Contains(query)))
-            .OrderBy(x => x.Name)
-            .Skip(offset)
-            .Take(pagination.ItemsPerPage)
-            .ToArrayAsync();
+                      filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack));
+        }
 
-        return new PagedData<ExtensionEntity[]>
-        {
-            TotalItemsCount = results.Length,
-            CurrentPage = pagination.Page,
-            ItemsPerPage = pagination.ItemsPerPage,
-            Data = results
-        };
+        return await query.ToPagedListAsync(pagination.Page, pagination.PageSize);
     }
 
-    public async Task CreateExtensionAsync(ExtensionEntity extensionEntity)
+    public async ValueTask<ExtensionEntity> CreateExtensionAsync(ExtensionEntity extensionEntity)
     {
-        var exists = await _context.Set<ExtensionEntity>().AsNoTracking()
+        var exists = await _context.GetNoTrackingSet<ExtensionEntity>()
             .AnyAsync(x => x.PackageId == extensionEntity.PackageId);
         
         if (exists)
         {
-            await UpdateExtensionAsync(extensionEntity);
-            return;
+            throw new InvalidOperationException();
         }
 
-        await _context.ExtensionEntities.AddAsync(extensionEntity);
-        await _context.SaveChangesAsync();
+        return await _context.CreateAsync(extensionEntity);
     }
 
-    public async Task DeleteExtensionAsync(string packageId)
+    public async ValueTask DeleteExtensionAsync(string packageId)
     {
-        var extensionEntity = await _context.Set<ExtensionEntity>().AsNoTracking()
+        var extensionEntity = await _context.GetNoTrackingSet<ExtensionEntity>()
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
         
         if (extensionEntity == null)
@@ -138,46 +95,23 @@ public class ExtensionRepository : IExtensionRepository
             throw ErrorCodeExceptions.PackageIdNotFoundException();
         }
 
-        _context.ExtensionEntities.Remove(extensionEntity);
-        await _context.SaveChangesAsync();
+        await _context.DeleteAsync<ExtensionEntity>(extensionEntity.Id);
     }
 
-    public async Task UpdateExtensionAsync(ExtensionEntity extensionEntity)
+    public async ValueTask<ExtensionEntity> UpdateExtensionAsync(ExtensionEntity extensionEntity)
     {
-        var exists = await _context.Set<ExtensionEntity>().AsNoTracking()
+        var exists = await _context.GetNoTrackingSet<ExtensionEntity>()
             .AnyAsync(x => x.PackageId == extensionEntity.PackageId);
         
         if (!exists)
         {
-            await CreateExtensionAsync(extensionEntity);
-            return;
+            throw new InvalidOperationException();
         }
-        
-        _context.Entry(extensionEntity).CurrentValues.SetValues(extensionEntity);
-        await _context.SaveChangesAsync();
+
+        return await _context.UpdateAsync(extensionEntity);
     }
 
-    public async Task CountDownloadAsync(string packageId, string version)
-    {
-        var extensionEntity = await _context.ExtensionEntities.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.PackageId == packageId);
-        
-        if (extensionEntity == null)
-        {
-            return;
-        }
-        
-        var extensionDownloadInfoEntity = new ExtensionDownloadInfoEntity
-        {
-            ExtensionId = extensionEntity.Id,
-            DownloadedVersion = version
-        };
-        
-        await _context.ExtensionDownloadInfoEntities.AddAsync(extensionDownloadInfoEntity);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task UpdateDescription(string packageId, string description)
+    public async ValueTask UpdateDescription(string packageId, string description)
     {
         var extensionEntity = await _context.Set<ExtensionEntity>()
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
@@ -188,30 +122,7 @@ public class ExtensionRepository : IExtensionRepository
         }
 
         extensionEntity.Description = description;
-        await _context.SaveChangesAsync();
-    }
-    
-    public async Task<long> GetDownloadCountAsync(string packageId)
-    {
-        return await _context.Set<ExtensionDownloadInfoEntity>()
-            .AsNoTracking()
-            .Include(x => x.ExtensionEntity)
-            .CountAsync(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId);
-    }
-
-    public async Task<ExtensionDownloadInfoEntity[]> GetDownloadsAsync(
-        string packageId,
-        DateOnly? startDate = null,
-        DateOnly? endDate = null)
-    {
-        var startDateTime = startDate?.ToDateTime(TimeOnly.MinValue);
-        var endDateTime = endDate?.ToDateTime(TimeOnly.MaxValue);
         
-        return await _context.Set<ExtensionDownloadInfoEntity>()
-            .AsNoTracking()
-            .Include(x => x.ExtensionEntity)
-            .Where(x => (!startDate.HasValue || x.CreatedTimestamp >= startDateTime) 
-                        && (!endDateTime.HasValue || x.CreatedTimestamp <= endDateTime))
-            .ToArrayAsync();
+        await _context.UpdateAsync(extensionEntity);
     }
 }

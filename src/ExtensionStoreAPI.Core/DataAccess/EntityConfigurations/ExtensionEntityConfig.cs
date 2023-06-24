@@ -10,7 +10,7 @@ public class ExtensionEntityConfig : BaseCreatedUpdatedEntityConfig<ExtensionEnt
     public ExtensionEntityConfig()
     {
         Table = "extensions";
-        ColumnPrefix = "ext_";
+        ColumnPrefix = "e_";
     }
 
     public override void Configure(EntityTypeBuilder<ExtensionEntity> builder)

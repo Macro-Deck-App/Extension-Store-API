@@ -7,9 +7,9 @@ namespace ExtensionStoreAPI.Core.DataAccess.EntityConfigurations;
 public class BaseEntityConfig<T> : IEntityTypeConfiguration<T>
     where T : BaseEntity
 {
-    public const string Schema = "extensionstore";
-    public required string Table { get; set; }
-    public required string ColumnPrefix { get; set; }
+    protected const string Schema = "extensionstore";
+    public required string Table { get; init; }
+    public required string ColumnPrefix { get; init; }
     
     public virtual void Configure(EntityTypeBuilder<T> builder)
     {

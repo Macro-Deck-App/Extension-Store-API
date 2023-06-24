@@ -1,17 +1,28 @@
 using System.Reflection;
-using ExtensionStoreAPI.Core.DataAccess.Entities;
+using ExtensionStoreAPI.Core.Configuration;
+using ExtensionStoreAPI.Core.DataAccess.Interceptors;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace ExtensionStoreAPI.Core.DataAccess;
 
 public class ExtensionStoreDbContext : DbContext
 {
-    public DbSet<ExtensionEntity> ExtensionEntities => Set<ExtensionEntity>();
-    public DbSet<ExtensionFileEntity> ExtensionFileEntities => Set<ExtensionFileEntity>();
-    public DbSet<ExtensionDownloadInfoEntity> ExtensionDownloadInfoEntities => Set<ExtensionDownloadInfoEntity>();
-
-    public ExtensionStoreDbContext(DbContextOptions<ExtensionStoreDbContext> options) : base(options)
+    public ExtensionStoreDbContext(DbContextOptions<ExtensionStoreDbContext> options)
+        : base(options)
     {
+    }
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    {
+        var loggerFactory = new LoggerFactory()
+            .AddSerilog();
+        var connectionString = ExtensionStoreApiConfig.DatabaseConnectionStringOverride
+                               ?? ExtensionStoreApiConfig.DatabaseConnectionString;
+        options.UseNpgsql(connectionString);
+        options.UseLoggerFactory(loggerFactory);
+        options.AddInterceptors(new SaveChangesInterceptor());
     }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)

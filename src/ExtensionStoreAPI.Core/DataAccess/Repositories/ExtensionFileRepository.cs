@@ -1,6 +1,7 @@
 using ExtensionStoreAPI.Core.DataAccess.Entities;
 using ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
 using ExtensionStoreAPI.Core.Exceptions;
+using ExtensionStoreAPI.Core.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,28 +17,31 @@ public class ExtensionFileRepository : IExtensionFileRepository
         _context = context;
     }
 
-    public async Task<bool> ExistAsync(string packageId, string version)
+    public async ValueTask<bool> ExistAsync(string packageId, string version)
     {
-        return await _context.Set<ExtensionFileEntity>().AsNoTracking()
+        return await _context.GetNoTrackingSet<ExtensionFileEntity>()
             .Include(x => x.ExtensionEntity)
             .AnyAsync(x => x.ExtensionEntity != null
                            && x.ExtensionEntity.PackageId == packageId
                            && x.Version == version);
     }
 
-    public async Task<ExtensionFileEntity[]> GetFilesAsync(string packageId)
+    public async ValueTask<ExtensionFileEntity[]> GetFilesAsync(string packageId)
     {
-        return await _context.Set<ExtensionFileEntity>().AsNoTracking()
+        return await _context.GetNoTrackingSet<ExtensionFileEntity>()
             .Include(x => x.ExtensionEntity)
             .Where(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId)
             .ToArrayAsync();
     }
 
-    public async Task<ExtensionFileEntity?> GetFileAsync(string packageId, int? targetApiVersion = null, string version = "latest")
+    public async ValueTask<ExtensionFileEntity?> GetFileAsync(
+        string packageId,
+        int? targetApiVersion = null,
+        string version = "latest")
     {
         if (version.ToLower() != "latest")
         {
-            return await _context.Set<ExtensionFileEntity>().AsNoTracking()
+            return await _context.GetNoTrackingSet<ExtensionFileEntity>()
                 .FirstOrDefaultAsync(x =>
                     x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId
                                               && x.MinApiVersion <= targetApiVersion && x.Version == version);
@@ -52,9 +56,9 @@ public class ExtensionFileRepository : IExtensionFileRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task CreateFileAsync(string packageId, ExtensionFileEntity extensionFileEntity)
+    public async ValueTask<ExtensionFileEntity> CreateFileAsync(string packageId, ExtensionFileEntity extensionFileEntity)
     {
-        var exists = await _context.Set<ExtensionFileEntity>().AsNoTracking().Include(x => x.ExtensionEntity)
+        var exists = await _context.GetNoTrackingSet<ExtensionFileEntity>().Include(x => x.ExtensionEntity)
             .AnyAsync(x => x.ExtensionEntity != null 
                            && x.ExtensionEntity.PackageId == packageId
                            && x.Version == extensionFileEntity.Version);
@@ -67,6 +71,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         var extensionEntity = await _context.Set<ExtensionEntity>()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
+        
         if (extensionEntity == null)
         {
             throw ErrorCodeExceptions.PackageIdNotFoundException();
@@ -74,13 +79,12 @@ public class ExtensionFileRepository : IExtensionFileRepository
         
         extensionFileEntity.ExtensionId = extensionEntity.Id;
 
-        await _context.Set<ExtensionFileEntity>().AddAsync(extensionFileEntity);
-        await _context.SaveChangesAsync();
+        return await _context.CreateAsync(extensionFileEntity);
     }
 
-    public async Task DeleteFileAsync(string packageId, string version)
+    public async ValueTask DeleteFileAsync(string packageId, string version)
     {
-        var extensionFileEntity = await _context.Set<ExtensionFileEntity>().AsNoTracking()
+        var extensionFileEntity = await _context.GetNoTrackingSet<ExtensionFileEntity>()
             .Include(x => x.ExtensionEntity)
             .FirstOrDefaultAsync(x => x.ExtensionEntity != null 
                                       && x.ExtensionEntity.PackageId == packageId
@@ -91,7 +95,6 @@ public class ExtensionFileRepository : IExtensionFileRepository
             return;
         }
 
-        _context.Set<ExtensionFileEntity>().Remove(extensionFileEntity);
-        await _context.SaveChangesAsync();
+        await _context.DeleteAsync<ExtensionFileEntity>(extensionFileEntity.Id);
     }
 }

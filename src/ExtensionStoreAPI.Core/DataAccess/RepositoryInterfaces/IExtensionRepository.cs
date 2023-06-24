@@ -1,22 +1,17 @@
 using ExtensionStoreAPI.Core.DataAccess.Entities;
-using ExtensionStoreAPI.Core.Models;
+using ExtensionStoreAPI.Core.DataTypes.Request;
+using ExtensionStoreAPI.Core.DataTypes.Response;
 
 namespace ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
 
 public interface IExtensionRepository
 {
-    public Task<bool> ExistAsync(string packageId);
-    public Task<string[]> GetCategoriesAsync(Filter filter);
-    public Task<ExtensionEntity[]> GetAllExtensions();
-    public Task<PagedData<ExtensionEntity[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination);
-    public Task<ExtensionEntity[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count);
-    public Task<ExtensionEntity?> GetByPackageIdAsync(string packageId);
-    public Task<PagedData<ExtensionEntity[]>> SearchAsync(string query, Filter filter, Pagination pagination);
-    public Task CreateExtensionAsync(ExtensionEntity extensionEntity);
-    public Task DeleteExtensionAsync(string packageId);
-    public Task UpdateExtensionAsync(ExtensionEntity extensionEntity);
-    public Task UpdateDescription(string packageId, string description);
-    public Task CountDownloadAsync(string packageId, string version);
-    public Task<long> GetDownloadCountAsync(string packageId);
-    public Task<ExtensionDownloadInfoEntity[]> GetDownloadsAsync(string packageId, DateOnly? startDate = null, DateOnly? endDate = null);
+    public ValueTask<bool> ExistAsync(string packageId);
+    public ValueTask<string[]> GetCategoriesAsync(Filter filter);
+    public ValueTask<ExtensionEntity?> GetByPackageIdAsync(string packageId);
+    public ValueTask<PagedList<ExtensionEntity>> GetAllAsync(string? searchString, Filter? filter, Pagination pagination);
+    public ValueTask<ExtensionEntity> CreateExtensionAsync(ExtensionEntity extensionEntity);
+    public ValueTask DeleteExtensionAsync(string packageId);
+    public ValueTask<ExtensionEntity> UpdateExtensionAsync(ExtensionEntity extensionEntity);
+    public ValueTask UpdateDescription(string packageId, string description);
 }

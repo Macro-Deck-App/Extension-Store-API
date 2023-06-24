@@ -1,6 +1,6 @@
 using AutoMapper;
+using ExtensionStoreAPI.Core.DataTypes.ApiV2;
 using ExtensionStoreAPI.Core.ManagerInterfaces;
-using ExtensionStoreAPI.Core.Models.ApiV2;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExtensionStoreAPI.Controllers.ApiV2;
@@ -28,23 +28,27 @@ public class ApiV2ExtensionFilesController : ControllerBase
     public async Task<ActionResult<ApiV2ExtensionFile[]>> GetExtensionFilesAsync(string packageId)
     {
         var extensionFiles = await _extensionFileManager.GetFilesAsync(packageId);
-        var apiV2ExtensionFiles = _mapper.Map<ApiV2ExtensionFile[]>(extensionFiles);
-        return Ok(apiV2ExtensionFiles);
+        return _mapper.Map<ApiV2ExtensionFile[]>(extensionFiles);
     }
 
     [HttpGet("{packageId}@{fileVersion}")]
-    public async Task<ActionResult<ApiV2ExtensionFile>> GetExtensionFileAsync(string packageId, string fileVersion, int? apiVersion = null)
+    public async Task<ActionResult<ApiV2ExtensionFile>> GetExtensionFileAsync(
+        string packageId,
+        string fileVersion,
+        [FromQuery] int? apiVersion = null)
     {
         var extensionFile = await _extensionFileManager.GetFileAsync(packageId, apiVersion, fileVersion);
-        var apiV2ExtensionFile = _mapper.Map<ApiV2ExtensionFile>(extensionFile);
-        return Ok(apiV2ExtensionFile);
+        return _mapper.Map<ApiV2ExtensionFile>(extensionFile);
     }
 
-    [HttpGet("Download/{packageId}@{fileVersion}")]
-    public async Task<ActionResult<byte[]>> DownloadExtensionFileAsync(string packageId, string fileVersion, int apiVersion = 3000)
+    [HttpGet("download/{packageId}@{fileVersion}")]
+    public async Task<ActionResult<byte[]>> DownloadExtensionFileAsync(
+        string packageId,
+        string fileVersion,
+        [FromQuery] int apiVersion = 3000)
     {
-        var fileBytes = await _extensionFileManager.GetFileBytesAsync(packageId, apiVersion, fileVersion);
+        var fileStream = await _extensionFileManager.GetFileStreamAsync(packageId, apiVersion, fileVersion);
         var fileName = $"{packageId.ToLower()}_{fileVersion.ToLower()}.macroDeckExtension";
-        return File(fileBytes, "application/zip", fileName);
+        return File(fileStream, "application/zip", fileName);
     }
 }

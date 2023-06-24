@@ -9,7 +9,7 @@ public class ExtensionFileEntityConfig : BaseCreatedEntityConfig<ExtensionFileEn
     public ExtensionFileEntityConfig()
     {
         Table = "extension_files";
-        ColumnPrefix = "extfl_";
+        ColumnPrefix = "ef_";
     }
 
     public override void Configure(EntityTypeBuilder<ExtensionFileEntity> builder)

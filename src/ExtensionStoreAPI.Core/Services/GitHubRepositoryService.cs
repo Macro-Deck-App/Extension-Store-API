@@ -1,9 +1,8 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
+using ExtensionStoreAPI.Core.DataTypes.GitHub;
 using ExtensionStoreAPI.Core.Interfaces;
-using ExtensionStoreAPI.Core.Models;
-using Markdig;
 using Newtonsoft.Json.Linq;
 using Serilog;
 
@@ -17,15 +16,13 @@ public class GitHubRepositoryService : IGitHubRepositoryService
     private const string GitHubApi = "https://api.github.com";
     private const string RawGitHubUrl = "https://raw.githubusercontent.com";
 
-    private readonly Dictionary<string, HttpResponseMessage?> _cache = new();
-
     public GitHubRepositoryService(IHttpClientFactory httpClientFactory)
     {
         _httpClient = httpClientFactory.CreateClient();
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
     }
 
-    public static string GetRepositoryNameFromUrl(string? repositoryUrl)
+    public static string? GetRepositoryNameFromUrl(string? repositoryUrl)
     {
         if (string.IsNullOrWhiteSpace(repositoryUrl))
         {
@@ -33,50 +30,40 @@ public class GitHubRepositoryService : IGitHubRepositoryService
         }
         const string pattern = @"(?:https?://)?(?:www\.)?github\.com/([\w-]+/[\w-]+)";
         var match = Regex.Match(repositoryUrl, pattern);
-        if (match.Success)
-        {
-            return match.Groups[1].Value;
-        }
-        return string.Empty;
+        return match.Success ? match.Groups[1].Value : null;
     }
 
     public async Task<string?> GetDefaultBranchName(string? repositoryUrl)
     {  
         var repositoryName = GetRepositoryNameFromUrl(repositoryUrl);
-        var response = await MakeGetRequestAsync(GitHubApi, "repos", repositoryName);
+        var response = await GetRequestAsync(GitHubApi, "repos", repositoryName);
         if (response is not { StatusCode: HttpStatusCode.OK })
         {
             return "main"; // Fallback
         }
         var responseString = await response.Content.ReadAsStringAsync();
         _logger.Verbose("Response: {ResponseString}", responseString);
-        var defaultBranch = JObject.Parse(responseString)["default_branch"]?.ToString();
-        return defaultBranch;
+        
+        return JObject.Parse(responseString)["default_branch"]?.ToString();
     }
 
     public async Task<string> GetReadmeAsync(string? repositoryUrl)
     {
         var repositoryName = GetRepositoryNameFromUrl(repositoryUrl);
         var defaultBranchName = await GetDefaultBranchName(repositoryUrl);
-        var response = await MakeGetRequestAsync(RawGitHubUrl, repositoryName, defaultBranchName, "README.md");
+        var response = await GetRequestAsync(RawGitHubUrl, repositoryName, defaultBranchName, "README.md");
         if (response is not { StatusCode: HttpStatusCode.OK })
         {
             return string.Empty;
         }
-        var responseString = await response.Content.ReadAsStringAsync();
-        _logger.Verbose("Response: {ResponseString}", responseString);
-        var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-        var result = Markdown.ToHtml(responseString, pipeline);
-            
-        return result;
-
+        return await response.Content.ReadAsStringAsync();
     }
     
     public async Task<GitHubLicense> GetLicenseAsync(string? repositoryUrl)
     {
         var repositoryName = GetRepositoryNameFromUrl(repositoryUrl);
         var gitHubLicense = new GitHubLicense();
-        var response = await MakeGetRequestAsync(GitHubApi,"repos", repositoryName);
+        var response = await GetRequestAsync(GitHubApi,"repos", repositoryName);
         if (response is not { StatusCode: HttpStatusCode.OK })
         {
             return gitHubLicense;
@@ -93,31 +80,28 @@ public class GitHubRepositoryService : IGitHubRepositoryService
     public async Task<string> GetDescriptionAsync(string? repositoryUrl)
     {
         var repositoryName = GetRepositoryNameFromUrl(repositoryUrl);
-        var response = await MakeGetRequestAsync(GitHubApi, "repos", repositoryName);
+        var response = await GetRequestAsync(GitHubApi, "repos", repositoryName);
         if (response is not { StatusCode: HttpStatusCode.OK })
         {
             return string.Empty;
         }
         var responseString = await response.Content.ReadAsStringAsync();
         _logger.Verbose("Response: {ResponseString}", responseString);
-        var description = JObject.Parse(responseString)["description"]?.ToString();
-        return description ?? string.Empty;
+        
+        return JObject.Parse(responseString)["description"]?.ToString() ?? string.Empty;
     }
 
-    private async Task<HttpResponseMessage?> MakeGetRequestAsync(string api, string? endpoint, params string?[] parameters)
+    private async Task<HttpResponseMessage?> GetRequestAsync(
+        string api,
+        string? endpoint,
+        params string?[] parameters)
     {
         var requestUrl = $"{api}/{endpoint}/{string.Join("/",parameters)}";
-        if (_cache.TryGetValue(requestUrl, out var cachedResult))
-        {
-            _logger.Verbose("Return cached {RequestUrl}", requestUrl);
-            return cachedResult;
-        }
-        _logger.Verbose("Request url: {RequestUrl}", requestUrl);
         var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-        var productValue = new ProductInfoHeaderValue("MacroDeckExtensionStore", "1.0");
-        request.Headers.UserAgent.Add(productValue);
-        var response = await _httpClient.SendAsync(request);
-        _cache.Add(requestUrl, response);
-        return response;
+        
+        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("MacroDeckExtensionStore", "1.0"));
+        
+        _logger.Verbose("Request url: {RequestUrl}", requestUrl);
+        return await _httpClient.SendAsync(request);
     }
 }

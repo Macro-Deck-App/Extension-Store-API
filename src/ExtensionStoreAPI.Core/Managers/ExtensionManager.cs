@@ -2,9 +2,11 @@ using System.Globalization;
 using AutoMapper;
 using ExtensionStoreAPI.Core.DataAccess.Entities;
 using ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
+using ExtensionStoreAPI.Core.DataTypes.ExtensionStore;
+using ExtensionStoreAPI.Core.DataTypes.Request;
+using ExtensionStoreAPI.Core.DataTypes.Response;
 using ExtensionStoreAPI.Core.Exceptions;
 using ExtensionStoreAPI.Core.ManagerInterfaces;
-using ExtensionStoreAPI.Core.Models;
 using JetBrains.Annotations;
 using Serilog;
 
@@ -16,25 +18,22 @@ public class ExtensionManager : IExtensionManager
     private readonly ILogger _logger = Log.ForContext<ExtensionManager>();
     private readonly IExtensionRepository _extensionRepository;
     private readonly IExtensionFileRepository _extensionFileRepository;
+    private readonly IExtensionDownloadInfoRepository _extensionDownloadInfoRepository;
     private readonly IFileManager _fileManager;
     private readonly IMapper _mapper;
 
-    public ExtensionManager(IExtensionRepository extensionRepository,
+    public ExtensionManager(
+        IExtensionRepository extensionRepository,
         IExtensionFileRepository extensionFileRepository,
+        IExtensionDownloadInfoRepository extensionDownloadInfoRepository,
         IFileManager fileManager,
         IMapper mapper)
     {
         _extensionRepository = extensionRepository;
         _extensionFileRepository = extensionFileRepository;
+        _extensionDownloadInfoRepository = extensionDownloadInfoRepository;
         _fileManager = fileManager;
         _mapper = mapper;
-    }
-
-    public async Task<PagedData<ExtensionSummary[]>> GetExtensionsPagedAsync(Filter filter, Pagination pagination)
-    {
-        var extensionEntities = await _extensionRepository.GetExtensionsPagedAsync(filter, pagination);
-        var extensions = _mapper.Map<PagedData<ExtensionSummary[]>>(extensionEntities);
-        return extensions;
     }
 
     public async Task<Extension> GetByPackageIdAsync(string packageId)
@@ -66,15 +65,10 @@ public class ExtensionManager : IExtensionManager
         return await _extensionRepository.GetCategoriesAsync(filter);
     }
 
-    public async Task<ExtensionSummary[]> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
+    public async Task<List<ExtensionSummary>> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
     {
-        var topEntities = await _extensionRepository.GetTopDownloadsOfMonth(filter, month, year, count);
-        if (topEntities.Length == 0)
-        {
-            return Array.Empty<ExtensionSummary>();
-        }
-        var top = _mapper.Map<ExtensionSummary[]>(topEntities);
-        return top;
+        var topEntities = await _extensionDownloadInfoRepository.GetTopDownloadsOfMonth(filter, month, year, count);
+        return _mapper.Map<List<ExtensionSummary>>(topEntities);
     }
 
     public async Task<bool> ExistsAsync(string packageId)
@@ -83,11 +77,10 @@ public class ExtensionManager : IExtensionManager
         return exists;
     }
 
-    public async Task<PagedData<ExtensionSummary[]>> SearchAsync(string query, Filter filter, Pagination pagination)
+    public async Task<PagedList<ExtensionSummary>> GetAllAsync(string? searchString, Filter? filter, Pagination pagination)
     {
-        var extensionEntities = await _extensionRepository.SearchAsync(query, filter, pagination);
-        var extensions = _mapper.Map<PagedData<ExtensionSummary[]>>(extensionEntities);
-        return extensions;
+        var extensionEntities = await _extensionRepository.GetAllAsync(searchString, filter, pagination);
+        return _mapper.Map<PagedList<ExtensionSummary>>(extensionEntities);
     }
 
     public async Task CreateAsync(Extension extension)
@@ -107,11 +100,11 @@ public class ExtensionManager : IExtensionManager
 
     public async Task DeleteAllAsync()
     {
-        var extensions = await _extensionRepository.GetAllExtensions();
+        /*var extensions = await _extensionRepository.GetAllExtensions();
         foreach (var extension in extensions)
         {
             await DeleteAsync(extension.PackageId);
-        }
+        }*/
     }
 
     public async Task DeleteAsync(string packageId)
@@ -161,29 +154,6 @@ public class ExtensionManager : IExtensionManager
             _logger.Fatal(ex, "Cannot open icon for {PackageId}", packageId);
             throw ErrorCodeExceptions.InternalErrorException();
         }
-    }
-
-    public async Task CountDownloadAsync(string packageId, string version)
-    {
-        await _extensionRepository.CountDownloadAsync(packageId, version);
-    }
-
-    public async Task<long> GetDownloadCountAsync(string packageId)
-    {
-        var count = await _extensionRepository.GetDownloadCountAsync(packageId);
-        return count;
-    }
-
-    public async Task<ExtensionDownloadInfo[]> GetDownloadsAsync(string packageId, DateOnly? startDate = null, DateOnly? endDate = null)
-    {
-        var downloadInfoEntities = await _extensionRepository.GetDownloadsAsync(packageId, startDate, endDate);
-        if (downloadInfoEntities.Length == 0)
-        {
-            return Array.Empty<ExtensionDownloadInfo>();
-        }
-
-        var downloadInfos = _mapper.Map<ExtensionDownloadInfo[]>(downloadInfoEntities);
-        return downloadInfos;
     }
 
     private string FixCategoryName(string? categoryName)

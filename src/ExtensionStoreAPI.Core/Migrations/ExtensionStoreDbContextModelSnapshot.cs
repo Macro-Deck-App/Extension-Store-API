@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MacroDeckExtensionStoreLibrary.Migrations
+namespace ExtensionStoreAPI.Core.Migrations
 {
     [DbContext(typeof(ExtensionStoreDbContext))]
     partial class ExtensionStoreDbContextModelSnapshot : ModelSnapshot
@@ -17,157 +17,163 @@ namespace MacroDeckExtensionStoreLibrary.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.2")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("ExtensionStoreAPI.Core.DataAccess.Entities.ExtensionDownloadInfoEntity", b =>
                 {
-                    b.Property<long>("ExtensionDownloadId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("exdl_id");
+                        .HasColumnType("integer")
+                        .HasColumnName("d_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ExtensionDownloadId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DownloadDateTime")
+                    b.Property<DateTime>("CreatedTimestamp")
                         .HasColumnType("timestamp without time zone")
-                        .HasColumnName("exdl_time");
+                        .HasColumnName("d_created_timestamp");
 
                     b.Property<string>("DownloadedVersion")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("exdl_version");
+                        .HasColumnName("d_version");
 
-                    b.Property<long>("ExtensionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("exdl_ext_ref");
+                    b.Property<int>("ExtensionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("d_ext_ref");
 
-                    b.HasKey("ExtensionDownloadId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ExtensionId");
 
-                    b.ToTable("md_extension_downloads", (string)null);
+                    b.ToTable("extension_downloads", "extensionstore");
                 });
 
             modelBuilder.Entity("ExtensionStoreAPI.Core.DataAccess.Entities.ExtensionEntity", b =>
                 {
-                    b.Property<long>("ExtensionId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("ext_id");
+                        .HasColumnType("integer")
+                        .HasColumnName("e_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ExtensionId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Author")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ext_author");
+                        .HasColumnName("e_author");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ext_category");
+                        .HasColumnName("e_category");
+
+                    b.Property<DateTime>("CreatedTimestamp")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("e_created_timestamp");
 
                     b.Property<string>("DSupportUserId")
                         .HasColumnType("text")
-                        .HasColumnName("ext_discord_author_userid");
+                        .HasColumnName("e_discord_author_userid");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
-                        .HasColumnName("ext_description");
+                        .HasColumnName("e_description");
 
                     b.Property<int>("ExtensionType")
                         .HasColumnType("integer")
-                        .HasColumnName("ext_type");
+                        .HasColumnName("e_type");
 
                     b.Property<string>("GitHubRepository")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ext_github_repository");
+                        .HasColumnName("e_github_repository");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ext_name");
+                        .HasColumnName("e_name");
 
                     b.Property<string>("PackageId")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ext_package_id");
+                        .HasColumnName("e_package_id");
 
-                    b.HasKey("ExtensionId");
+                    b.Property<DateTime?>("UpdatedTimestamp")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("e_updated_timestamp");
 
-                    b.ToTable("md_extensions", (string)null);
+                    b.HasKey("Id");
+
+                    b.ToTable("extensions", "extensionstore");
                 });
 
             modelBuilder.Entity("ExtensionStoreAPI.Core.DataAccess.Entities.ExtensionFileEntity", b =>
                 {
-                    b.Property<long>("ExtensionFileId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("extfl_id");
+                        .HasColumnType("integer")
+                        .HasColumnName("ef_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ExtensionFileId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
+                    b.Property<DateTime>("CreatedTimestamp")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("ef_created_timestamp");
+
+                    b.Property<int>("ExtensionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ef_ext_ref");
+
+                    b.Property<string>("FileHash")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("extfl_description");
-
-                    b.Property<long>("ExtensionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("extfl_ext_ref");
+                        .HasColumnName("ef_file_hash");
 
                     b.Property<string>("IconFileName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("extfl_icon_filename");
+                        .HasColumnName("ef_icon_filename");
 
                     b.Property<string>("LicenseName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("extfl_license_name");
+                        .HasColumnName("ef_license_name");
 
                     b.Property<string>("LicenseUrl")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("extfl_license_url");
-
-                    b.Property<string>("Md5Hash")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("extfl_md5_hash");
+                        .HasColumnName("ef_license_url");
 
                     b.Property<int>("MinApiVersion")
                         .HasColumnType("integer")
-                        .HasColumnName("extfl_min_api_version");
+                        .HasColumnName("ef_min_api_version");
 
                     b.Property<string>("PackageFileName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("extfl_pkg_filename");
+                        .HasColumnName("ef_pkg_filename");
 
-                    b.Property<string>("ReadmeHtml")
+                    b.Property<string>("Readme")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("extfl_readme_html");
+                        .HasColumnName("ef_readme");
 
                     b.Property<DateTime>("UploadDateTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("extfl_upload_timestamp");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Version")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("extfl_version");
+                        .HasColumnName("ef_version");
 
-                    b.HasKey("ExtensionFileId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ExtensionId");
 
-                    b.ToTable("md_extension_files", (string)null);
+                    b.ToTable("extension_files", "extensionstore");
                 });
 
             modelBuilder.Entity("ExtensionStoreAPI.Core.DataAccess.Entities.ExtensionDownloadInfoEntity", b =>

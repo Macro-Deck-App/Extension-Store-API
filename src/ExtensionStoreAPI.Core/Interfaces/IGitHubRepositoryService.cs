@@ -1,4 +1,4 @@
-using ExtensionStoreAPI.Core.Models;
+using ExtensionStoreAPI.Core.DataTypes.GitHub;
 
 namespace ExtensionStoreAPI.Core.Interfaces;
 
