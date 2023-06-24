@@ -17,7 +17,14 @@ public class ExtensionEntityConfig : BaseCreatedUpdatedEntityConfig<ExtensionEnt
     {
         base.Configure(builder);
         
-        builder.ToTable(Table, schema: Schema);
+        builder.ToTable(Table);
+
+        builder.HasIndex(x => x.PackageId)
+            .IsUnique();
+
+        builder.HasIndex(x => x.ExtensionType);
+        
+        builder.HasIndex(x => x.Category);
         
         builder.Property(p => p.ExtensionType)
             .HasColumnName(ColumnPrefix + "type")

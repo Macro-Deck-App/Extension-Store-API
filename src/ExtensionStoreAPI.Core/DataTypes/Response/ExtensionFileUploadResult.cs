@@ -5,7 +5,7 @@ namespace ExtensionStoreAPI.Core.DataTypes.Response;
 public class ExtensionFileUploadResult
 {
     public ExtensionManifest? ExtensionManifest { get; set; }
-    public string? ReadmeHtml { get; set; }
+    public string? Readme { get; set; }
     public string? Description { get; set; }
     public string? PackageFileName { get; set; }
     public string? IconFileName { get; set; }

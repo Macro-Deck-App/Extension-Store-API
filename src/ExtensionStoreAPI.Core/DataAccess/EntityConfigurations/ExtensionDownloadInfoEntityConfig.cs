@@ -8,7 +8,7 @@ public class ExtensionDownloadInfoEntityConfig : BaseCreatedEntityConfig<Extensi
 {
     public ExtensionDownloadInfoEntityConfig()
     {
-        Table = "extension_downloads";
+        Table = "downloads";
         ColumnPrefix = "d_";
     }
 
@@ -16,7 +16,13 @@ public class ExtensionDownloadInfoEntityConfig : BaseCreatedEntityConfig<Extensi
     {
         base.Configure(builder);
         
-        builder.ToTable(Table, schema: Schema);   
+        builder.ToTable(Table);
+
+        builder.HasIndex(x => x.DownloadedVersion);
+
+        builder.HasIndex(x => x.CreatedTimestamp);
+
+        builder.HasIndex(x => x.ExtensionId);
         
         builder.Property(p => p.DownloadedVersion)
             .HasColumnName(ColumnPrefix + "version")

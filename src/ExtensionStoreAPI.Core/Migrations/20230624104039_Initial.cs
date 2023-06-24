@@ -39,7 +39,7 @@ namespace ExtensionStoreAPI.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "extension_downloads",
+                name: "downloads",
                 schema: "extensionstore",
                 columns: table => new
                 {
@@ -51,9 +51,9 @@ namespace ExtensionStoreAPI.Core.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_extension_downloads", x => x.d_id);
+                    table.PrimaryKey("PK_downloads", x => x.d_id);
                     table.ForeignKey(
-                        name: "FK_extension_downloads_extensions_e_ref",
+                        name: "FK_downloads_extensions_e_ref",
                         column: x => x.e_ref,
                         principalSchema: "extensionstore",
                         principalTable: "extensions",
@@ -62,29 +62,28 @@ namespace ExtensionStoreAPI.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "extension_files",
+                name: "files",
                 schema: "extensionstore",
                 columns: table => new
                 {
-                    ef_id = table.Column<int>(type: "integer", nullable: false)
+                    f_id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ef_version = table.Column<string>(type: "text", nullable: false),
-                    ef_min_api_version = table.Column<int>(type: "integer", nullable: false),
-                    ef_pkg_filename = table.Column<string>(type: "text", nullable: false),
-                    ef_icon_filename = table.Column<string>(type: "text", nullable: false),
-                    ef_readme = table.Column<string>(type: "text", nullable: false),
-                    ef_file_hash = table.Column<string>(type: "text", nullable: false),
-                    ef_license_name = table.Column<string>(type: "text", nullable: false),
-                    ef_license_url = table.Column<string>(type: "text", nullable: false),
-                    UploadDateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    f_version = table.Column<string>(type: "text", nullable: false),
+                    f_min_api_version = table.Column<int>(type: "integer", nullable: false),
+                    f_pkg_filename = table.Column<string>(type: "text", nullable: false),
+                    f_icon_filename = table.Column<string>(type: "text", nullable: false),
+                    f_readme = table.Column<string>(type: "text", nullable: true),
+                    f_file_hash = table.Column<string>(type: "text", nullable: false),
+                    f_license_name = table.Column<string>(type: "text", nullable: false),
+                    f_license_url = table.Column<string>(type: "text", nullable: false),
                     e_ref = table.Column<int>(type: "integer", nullable: false),
-                    ef_created_timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    f_created_timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_extension_files", x => x.ef_id);
+                    table.PrimaryKey("PK_files", x => x.f_id);
                     table.ForeignKey(
-                        name: "FK_extension_files_extensions_e_ref",
+                        name: "FK_files_extensions_e_ref",
                         column: x => x.e_ref,
                         principalSchema: "extensionstore",
                         principalTable: "extensions",
@@ -93,27 +92,64 @@ namespace ExtensionStoreAPI.Core.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_extension_downloads_e_ref",
+                name: "IX_downloads_d_created_timestamp",
                 schema: "extensionstore",
-                table: "extension_downloads",
+                table: "downloads",
+                column: "d_created_timestamp");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_downloads_d_version",
+                schema: "extensionstore",
+                table: "downloads",
+                column: "d_version");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_downloads_e_ref",
+                schema: "extensionstore",
+                table: "downloads",
                 column: "e_ref");
 
             migrationBuilder.CreateIndex(
-                name: "IX_extension_files_e_ref",
+                name: "IX_extensions_e_category",
                 schema: "extensionstore",
-                table: "extension_files",
+                table: "extensions",
+                column: "e_category");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_extensions_e_package_id",
+                schema: "extensionstore",
+                table: "extensions",
+                column: "e_package_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_extensions_e_type",
+                schema: "extensionstore",
+                table: "extensions",
+                column: "e_type");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_files_e_ref",
+                schema: "extensionstore",
+                table: "files",
                 column: "e_ref");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_files_f_version",
+                schema: "extensionstore",
+                table: "files",
+                column: "f_version");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "extension_downloads",
+                name: "downloads",
                 schema: "extensionstore");
 
             migrationBuilder.DropTable(
-                name: "extension_files",
+                name: "files",
                 schema: "extensionstore");
 
             migrationBuilder.DropTable(

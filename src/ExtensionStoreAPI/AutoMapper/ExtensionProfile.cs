@@ -32,6 +32,7 @@ public class ExtensionProfile : Profile
             .ReverseMap();
 
         CreateMap<ExtensionDownloadInfoEntity, ExtensionDownloadInfo>()
+            .ForMember(dest => dest.DownloadDateTime, opt => opt.MapFrom(x => x.CreatedTimestamp))
             .ReverseMap();
     }
 }

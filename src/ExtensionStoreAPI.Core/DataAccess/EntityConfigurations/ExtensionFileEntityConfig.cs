@@ -8,15 +8,19 @@ public class ExtensionFileEntityConfig : BaseCreatedEntityConfig<ExtensionFileEn
 {
     public ExtensionFileEntityConfig()
     {
-        Table = "extension_files";
-        ColumnPrefix = "ef_";
+        Table = "files";
+        ColumnPrefix = "f_";
     }
 
     public override void Configure(EntityTypeBuilder<ExtensionFileEntity> builder)
     {
         base.Configure(builder);
         
-        builder.ToTable(Table, schema: Schema);
+        builder.ToTable(Table);
+
+        builder.HasIndex(x => x.Version);
+
+        builder.HasIndex(x => x.ExtensionId);
         
         builder.Property(p => p.Version)
             .HasColumnName(ColumnPrefix + "version")
@@ -33,10 +37,9 @@ public class ExtensionFileEntityConfig : BaseCreatedEntityConfig<ExtensionFileEn
         builder.Property(p => p.IconFileName)
             .HasColumnName(ColumnPrefix + "icon_filename")
             .IsRequired();
-        
+
         builder.Property(p => p.Readme)
-            .HasColumnName(ColumnPrefix + "readme")
-            .IsRequired();
+            .HasColumnName(ColumnPrefix + "readme");
         
         builder.Property(p => p.FileHash)
             .HasColumnName(ColumnPrefix + "file_hash")

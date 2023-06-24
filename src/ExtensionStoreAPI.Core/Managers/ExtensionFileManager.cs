@@ -4,6 +4,7 @@ using ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
 using ExtensionStoreAPI.Core.DataTypes.ExtensionStore;
 using ExtensionStoreAPI.Core.DataTypes.GitHub;
 using ExtensionStoreAPI.Core.DataTypes.MacroDeck;
+using ExtensionStoreAPI.Core.DataTypes.Request;
 using ExtensionStoreAPI.Core.DataTypes.Response;
 using ExtensionStoreAPI.Core.Enums;
 using ExtensionStoreAPI.Core.Exceptions;
@@ -47,20 +48,15 @@ public class ExtensionFileManager : IExtensionFileManager
         return exist;
     }
 
-    public async Task<ExtensionFile[]> GetFilesAsync(string packageId)
+    public async Task<PagedList<ExtensionFile>> GetFilesAsync(string packageId, Pagination pagination)
     {
-        var extensionFileEntities = await _extensionFileRepository.GetFilesAsync(packageId);
-        if (extensionFileEntities.Length == 0)
-        {
-            return Array.Empty<ExtensionFile>();
-        }
-        var extensionFiles = _mapper.Map<ExtensionFile[]>(extensionFileEntities);
-        return extensionFiles;
+        var extensionFileEntities = await _extensionFileRepository.GetFilesAsync(packageId, pagination);
+        return _mapper.Map<PagedList<ExtensionFile>>(extensionFileEntities);
     }
 
-    public async Task<ExtensionFile> GetFileAsync(string packageId, int? targetApiVersion = null, string version = "latest")
+    public async Task<ExtensionFile> GetFileAsync(string packageId, string? version, int? targetApiVersion = null)
     {
-        var extensionFileEntity = await _extensionFileRepository.GetFileAsync(packageId, targetApiVersion, version);
+        var extensionFileEntity = await _extensionFileRepository.GetFileAsync(packageId, version, targetApiVersion);
         if (extensionFileEntity == null)
         {
             ErrorCodeExceptions.VersionNotFoundException();
@@ -115,13 +111,13 @@ public class ExtensionFileManager : IExtensionFileManager
         }
 
         var fileHash = await Sha256Utils.CalculateSha256Hash(finalPackageFilePath);
-        var readmeHtml = "";
+        var readme = "";
         var description = "";
         var license = new GitHubLicense();
 
         try
         {
-            readmeHtml = await _gitHubRepositoryService.GetReadmeAsync(extensionManifest.Repository);
+            readme = await _gitHubRepositoryService.GetReadmeAsync(extensionManifest.Repository);
         }
         catch (Exception ex)
         {
@@ -144,9 +140,9 @@ public class ExtensionFileManager : IExtensionFileManager
             _logger.Warning(ex, "Cannot get license of {PackageId}", extensionManifest.PackageId);
         }
 
-        var currentFile =
-            await _extensionFileRepository.GetFileAsync(extensionManifest.PackageId!,
-                extensionManifest.TargetPluginApiVersion);
+        var currentFile = await _extensionFileRepository.GetFileAsync(
+                extensionManifest.PackageId!,
+                targetApiVersion: extensionManifest.TargetPluginApiVersion);
 
         var result = new ExtensionFileUploadResult
         {
@@ -158,7 +154,7 @@ public class ExtensionFileManager : IExtensionFileManager
             FileHash = fileHash,
             LicenseName = license.Name,
             LicenseUrl = license.Url,
-            ReadmeHtml = readmeHtml,
+            Readme = readme,
             Description = description,
             NewVersion = extensionManifest.Version,
             CurrentVersion = currentFile?.Version
@@ -245,9 +241,9 @@ public class ExtensionFileManager : IExtensionFileManager
         return tmpFilePath;
     }
 
-    public async Task<FileStream> GetFileStreamAsync(string packageId, int targetApiVersion, string version)
+    public async Task<Tuple<FileStream, string>> GetFileStreamAsync(string packageId, string? version, int targetApiVersion)
     {
-        var extensionFile = await _extensionFileRepository.GetFileAsync(packageId, targetApiVersion, version);
+        var extensionFile = await _extensionFileRepository.GetFileAsync(packageId, version, targetApiVersion);
         if (extensionFile == null)
         {
             throw ErrorCodeExceptions.VersionNotFoundException();
@@ -262,7 +258,7 @@ public class ExtensionFileManager : IExtensionFileManager
         try
         {
             await _extensionDownloadInfoRepository.IncreaseDownloadCounter(packageId, extensionFile.Version);
-            return File.Open(filePath, FileMode.Open);
+            return Tuple.Create(File.Open(filePath, FileMode.Open), extensionFile.Version);
         }
         catch (Exception ex)
         {

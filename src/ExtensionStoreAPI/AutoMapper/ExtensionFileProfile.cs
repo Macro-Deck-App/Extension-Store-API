@@ -12,6 +12,7 @@ public class ExtensionFileProfile : Profile
     public ExtensionFileProfile()
     {
         CreateMap<ExtensionFileEntity, ExtensionFile>()
+            .ForMember(dest => dest.UploadDateTime, opt => opt.MapFrom(x => x.CreatedTimestamp))
             .ReverseMap();
 
         CreateMap<ExtensionFileUploadResult, ExtensionFile>()

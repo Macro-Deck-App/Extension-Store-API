@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExtensionStoreAPI.Core.Migrations
 {
     [DbContext(typeof(ExtensionStoreDbContext))]
-    [Migration("20230624100912_Initial")]
+    [Migration("20230624104039_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace ExtensionStoreAPI.Core.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("extensionstore")
                 .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -49,9 +50,13 @@ namespace ExtensionStoreAPI.Core.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedTimestamp");
+
+                    b.HasIndex("DownloadedVersion");
+
                     b.HasIndex("ExtensionId");
 
-                    b.ToTable("extension_downloads", "extensionstore");
+                    b.ToTable("downloads", "extensionstore");
                 });
 
             modelBuilder.Entity("ExtensionStoreAPI.Core.DataAccess.Entities.ExtensionEntity", b =>
@@ -110,6 +115,13 @@ namespace ExtensionStoreAPI.Core.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Category");
+
+                    b.HasIndex("ExtensionType");
+
+                    b.HasIndex("PackageId")
+                        .IsUnique();
+
                     b.ToTable("extensions", "extensionstore");
                 });
 
@@ -118,13 +130,13 @@ namespace ExtensionStoreAPI.Core.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("ef_id");
+                        .HasColumnName("f_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedTimestamp")
                         .HasColumnType("timestamp without time zone")
-                        .HasColumnName("ef_created_timestamp");
+                        .HasColumnName("f_created_timestamp");
 
                     b.Property<int>("ExtensionId")
                         .HasColumnType("integer")
@@ -133,50 +145,48 @@ namespace ExtensionStoreAPI.Core.Migrations
                     b.Property<string>("FileHash")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ef_file_hash");
+                        .HasColumnName("f_file_hash");
 
                     b.Property<string>("IconFileName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ef_icon_filename");
+                        .HasColumnName("f_icon_filename");
 
                     b.Property<string>("LicenseName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ef_license_name");
+                        .HasColumnName("f_license_name");
 
                     b.Property<string>("LicenseUrl")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ef_license_url");
+                        .HasColumnName("f_license_url");
 
                     b.Property<int>("MinApiVersion")
                         .HasColumnType("integer")
-                        .HasColumnName("ef_min_api_version");
+                        .HasColumnName("f_min_api_version");
 
                     b.Property<string>("PackageFileName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ef_pkg_filename");
+                        .HasColumnName("f_pkg_filename");
 
                     b.Property<string>("Readme")
-                        .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ef_readme");
-
-                    b.Property<DateTime>("UploadDateTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnName("f_readme");
 
                     b.Property<string>("Version")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ef_version");
+                        .HasColumnName("f_version");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ExtensionId");
 
-                    b.ToTable("extension_files", "extensionstore");
+                    b.HasIndex("Version");
+
+                    b.ToTable("files", "extensionstore");
                 });
 
             modelBuilder.Entity("ExtensionStoreAPI.Core.DataAccess.Entities.ExtensionDownloadInfoEntity", b =>

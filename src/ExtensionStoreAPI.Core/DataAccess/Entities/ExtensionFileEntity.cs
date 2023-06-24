@@ -10,7 +10,6 @@ public class ExtensionFileEntity : BaseCreatedEntity
     public string FileHash { get; set; } = string.Empty;
     public string? LicenseName { get; set; }
     public string? LicenseUrl { get; set; }
-    public DateTime UploadDateTime { get; set; } = DateTime.Now;
     public int ExtensionId { get; set; }
     public ExtensionEntity? ExtensionEntity { get; set; }
 }

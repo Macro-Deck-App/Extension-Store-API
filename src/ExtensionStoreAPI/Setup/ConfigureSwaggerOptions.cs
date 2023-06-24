@@ -19,7 +19,7 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
     {
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
         {
-            Name = "Authorization",
+            Name = "x-admin-token",
             Type = SecuritySchemeType.Http,
             In = ParameterLocation.Header,
             Scheme = "Bearer",

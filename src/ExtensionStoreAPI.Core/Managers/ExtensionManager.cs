@@ -19,7 +19,6 @@ public class ExtensionManager : IExtensionManager
     private readonly IExtensionRepository _extensionRepository;
     private readonly IExtensionFileRepository _extensionFileRepository;
     private readonly IExtensionDownloadInfoRepository _extensionDownloadInfoRepository;
-    private readonly IFileManager _fileManager;
     private readonly IMapper _mapper;
 
     public ExtensionManager(
@@ -32,11 +31,10 @@ public class ExtensionManager : IExtensionManager
         _extensionRepository = extensionRepository;
         _extensionFileRepository = extensionFileRepository;
         _extensionDownloadInfoRepository = extensionDownloadInfoRepository;
-        _fileManager = fileManager;
         _mapper = mapper;
     }
 
-    public async Task<Extension> GetByPackageIdAsync(string packageId)
+    public async ValueTask<Extension> GetByPackageIdAsync(string packageId)
     {
         var extensionEntity = await _extensionRepository.GetByPackageIdAsync(packageId);
         if (extensionEntity == null)
@@ -48,7 +46,7 @@ public class ExtensionManager : IExtensionManager
         return extension;
     }
 
-    public async Task<ExtensionSummary> GetSummaryByPackageIdAsync(string packageId)
+    public async ValueTask<ExtensionSummary> GetSummaryByPackageIdAsync(string packageId)
     {
         var extensionEntity = await _extensionRepository.GetByPackageIdAsync(packageId);
         if (extensionEntity == null)
@@ -60,30 +58,30 @@ public class ExtensionManager : IExtensionManager
         return extension;
     }
 
-    public async Task<string[]> GetCategoriesAsync(Filter filter)
+    public async ValueTask<string[]> GetCategoriesAsync(Filter filter)
     {
         return await _extensionRepository.GetCategoriesAsync(filter);
     }
 
-    public async Task<List<ExtensionSummary>> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
+    public async ValueTask<List<ExtensionSummary>> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
     {
         var topEntities = await _extensionDownloadInfoRepository.GetTopDownloadsOfMonth(filter, month, year, count);
         return _mapper.Map<List<ExtensionSummary>>(topEntities);
     }
 
-    public async Task<bool> ExistsAsync(string packageId)
+    public async ValueTask<bool> ExistsAsync(string packageId)
     {
         var exists = await _extensionRepository.ExistAsync(packageId);
         return exists;
     }
 
-    public async Task<PagedList<ExtensionSummary>> GetAllAsync(string? searchString, Filter? filter, Pagination pagination)
+    public async ValueTask<PagedList<ExtensionSummary>> GetAllAsync(string? searchString, Filter? filter, Pagination pagination)
     {
         var extensionEntities = await _extensionRepository.GetAllAsync(searchString, filter, pagination);
         return _mapper.Map<PagedList<ExtensionSummary>>(extensionEntities);
     }
 
-    public async Task CreateAsync(Extension extension)
+    public async ValueTask CreateAsync(Extension extension)
     {
         try
         {
@@ -98,37 +96,7 @@ public class ExtensionManager : IExtensionManager
         }
     }
 
-    public async Task DeleteAllAsync()
-    {
-        /*var extensions = await _extensionRepository.GetAllExtensions();
-        foreach (var extension in extensions)
-        {
-            await DeleteAsync(extension.PackageId);
-        }*/
-    }
-
-    public async Task DeleteAsync(string packageId)
-    {
-        try
-        {
-            var extensionFileEntities = await _extensionFileRepository.GetFilesAsync(packageId);
-            foreach (var extensionFileEntity in extensionFileEntities)
-            {
-                _fileManager.DeleteExtensionFile(
-                    extensionFileEntity.PackageFileName,
-                    extensionFileEntity.IconFileName);
-                await _extensionFileRepository.DeleteFileAsync(packageId, extensionFileEntity.Version);
-            }
-            await _extensionRepository.DeleteExtensionAsync(packageId);
-        }
-        catch (Exception ex)
-        {
-            _logger.Fatal(ex, "Failed to delete extension {PackageId}", packageId);
-            throw;
-        }
-    }
-
-    public async Task<FileStream> GetIconStreamAsync(string packageId)
+    public async ValueTask<FileStream> GetIconStreamAsync(string packageId)
     {
         var extensionFile = await _extensionFileRepository.GetFileAsync(packageId);
         if (extensionFile == null)
@@ -156,7 +124,7 @@ public class ExtensionManager : IExtensionManager
         }
     }
 
-    private string FixCategoryName(string? categoryName)
+    private static string FixCategoryName(string? categoryName)
     {
         return string.IsNullOrWhiteSpace(categoryName)
             ? "No Category"

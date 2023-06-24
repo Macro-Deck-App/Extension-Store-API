@@ -27,6 +27,7 @@ public class ExtensionStoreDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("extensionstore");
         var applyGenericMethod =
             typeof(ModelBuilder).GetMethod("ApplyConfiguration", BindingFlags.Instance | BindingFlags.Public);
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes()

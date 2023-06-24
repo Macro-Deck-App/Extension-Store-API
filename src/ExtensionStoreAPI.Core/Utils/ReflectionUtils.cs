@@ -4,16 +4,16 @@ namespace ExtensionStoreAPI.Core.Utils;
 
 public static class ReflectionUtils
 {
-    public static IEnumerable<Assembly> GetMacroDeckAssemblies()
+    private static IEnumerable<Assembly> GetExtensionStoreApiAssemblies()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(x => x.FullName != null && x.FullName.StartsWith("MacroDeck")).ToArray();
+            .Where(x => x.FullName != null && x.FullName.StartsWith("ExtensionStoreAPI")).ToArray();
         return assemblies;
     }
 
-    public static IEnumerable<Type> GetMacroDeckTypes(Func<Type, bool> predicate)
+    public static IEnumerable<Type> GetExtensionStoreApiTypes(Func<Type, bool> predicate)
     {
-        var assemblies = GetMacroDeckAssemblies();
+        var assemblies = GetExtensionStoreApiAssemblies();
         var types = new List<Type>();
         foreach (var assembly in assemblies)
         {

@@ -1,5 +1,7 @@
 using AutoMapper;
 using ExtensionStoreAPI.Core.DataTypes.ApiV2;
+using ExtensionStoreAPI.Core.DataTypes.Request;
+using ExtensionStoreAPI.Core.DataTypes.Response;
 using ExtensionStoreAPI.Core.ManagerInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,31 +26,35 @@ public class ApiV2ExtensionFilesController : ControllerBase
         _mapper = mapper;
     }
     
-    [HttpGet("{packageId}")]
-    public async Task<ActionResult<ApiV2ExtensionFile[]>> GetExtensionFilesAsync(string packageId)
+    [HttpGet("{packageId}/all")]
+    public async Task<ActionResult<PagedList<ApiV2ExtensionFile>>> GetExtensionFilesAsync(
+        string packageId,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize)
     {
-        var extensionFiles = await _extensionFileManager.GetFilesAsync(packageId);
-        return _mapper.Map<ApiV2ExtensionFile[]>(extensionFiles);
+        var pagination = new Pagination(page ?? 1, pageSize ?? 20);
+        var extensionFiles = await _extensionFileManager.GetFilesAsync(packageId, pagination);
+        return _mapper.Map<PagedList<ApiV2ExtensionFile>>(extensionFiles);
     }
 
-    [HttpGet("{packageId}@{fileVersion}")]
+    [HttpGet("{packageId}")]
     public async Task<ActionResult<ApiV2ExtensionFile>> GetExtensionFileAsync(
         string packageId,
-        string fileVersion,
+        [FromQuery] string? fileVersion,
         [FromQuery] int? apiVersion = null)
     {
-        var extensionFile = await _extensionFileManager.GetFileAsync(packageId, apiVersion, fileVersion);
+        var extensionFile = await _extensionFileManager.GetFileAsync(packageId, fileVersion, apiVersion);
         return _mapper.Map<ApiV2ExtensionFile>(extensionFile);
     }
 
-    [HttpGet("download/{packageId}@{fileVersion}")]
+    [HttpGet("download/{packageId}")]
     public async Task<ActionResult<byte[]>> DownloadExtensionFileAsync(
         string packageId,
-        string fileVersion,
-        [FromQuery] int apiVersion = 3000)
+        [FromQuery] string? fileVersion,
+        [FromQuery] int apiVersion = 40)
     {
-        var fileStream = await _extensionFileManager.GetFileStreamAsync(packageId, apiVersion, fileVersion);
-        var fileName = $"{packageId.ToLower()}_{fileVersion.ToLower()}.macroDeckExtension";
-        return File(fileStream, "application/zip", fileName);
+        var file = await _extensionFileManager.GetFileStreamAsync(packageId, fileVersion, apiVersion);
+        var fileName = $"{packageId.ToLower()}_{file.Item2.ToLower()}.macroDeckExtension";
+        return File(file.Item1, "application/zip", fileName);
     }
 }

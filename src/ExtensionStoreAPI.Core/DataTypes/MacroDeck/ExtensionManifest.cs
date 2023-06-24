@@ -46,18 +46,18 @@ public class ExtensionManifest
 
      public static async Task<ExtensionManifest?> FromZipFilePathAsync(string zipFilePath)
      {
-         var zipFile = ZipFile.OpenRead(zipFilePath);
+         using var zipFile = ZipFile.OpenRead(zipFilePath);
          var extensionManifestFileEntry = zipFile.Entries
              .FirstOrDefault(x => x.Name.Equals(Constants.ExtensionManifestFileName, StringComparison.InvariantCulture));
-         zipFile.Dispose();
+         
          if (extensionManifestFileEntry == null)
          {
              return null;
          }
          
          await using var stream = new StreamReader(extensionManifestFileEntry.Open(), Encoding.UTF8).BaseStream;
-         var extensionManifest = await FromJsonStreamAsync(stream);
-         return extensionManifest;
+         
+         return  await FromJsonStreamAsync(stream);
      }
 
      public static async Task<ExtensionManifest?> FromJsonStreamAsync(Stream stream)

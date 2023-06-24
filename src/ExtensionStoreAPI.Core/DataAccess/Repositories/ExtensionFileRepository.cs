@@ -1,5 +1,7 @@
 using ExtensionStoreAPI.Core.DataAccess.Entities;
 using ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
+using ExtensionStoreAPI.Core.DataTypes.Request;
+using ExtensionStoreAPI.Core.DataTypes.Response;
 using ExtensionStoreAPI.Core.Exceptions;
 using ExtensionStoreAPI.Core.Extensions;
 using JetBrains.Annotations;
@@ -26,31 +28,30 @@ public class ExtensionFileRepository : IExtensionFileRepository
                            && x.Version == version);
     }
 
-    public async ValueTask<ExtensionFileEntity[]> GetFilesAsync(string packageId)
+    public async ValueTask<PagedList<ExtensionFileEntity>> GetFilesAsync(string packageId, Pagination pagination)
     {
         return await _context.GetNoTrackingSet<ExtensionFileEntity>()
             .Include(x => x.ExtensionEntity)
             .Where(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId)
-            .ToArrayAsync();
+            .ToPagedListAsync(pagination.Page, pagination.PageSize);
     }
 
     public async ValueTask<ExtensionFileEntity?> GetFileAsync(
         string packageId,
-        int? targetApiVersion = null,
-        string version = "latest")
+        string? version = null,
+        int? targetApiVersion = null)
     {
-        if (version.ToLower() != "latest")
+        if (version is null)
         {
             return await _context.GetNoTrackingSet<ExtensionFileEntity>()
-                .FirstOrDefaultAsync(x =>
-                    x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId
-                                              && x.MinApiVersion <= targetApiVersion && x.Version == version);
+                .FilterTargetApiVersion(targetApiVersion)
+                .OrderByDescending(x => x.Version)
+                .FirstOrDefaultAsync(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId);
         }
-        
+
         return await _context.Set<ExtensionFileEntity>().Include(x => x.ExtensionEntity)
-            .AsNoTracking()
-            .Where(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId &&
-                        (!targetApiVersion.HasValue || x.MinApiVersion <= targetApiVersion))
+            .FilterTargetApiVersion(targetApiVersion)
+            .Where(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId)
             .OrderByDescending(x => x.Version)
             .Take(1)
             .FirstOrDefaultAsync();
@@ -58,7 +59,8 @@ public class ExtensionFileRepository : IExtensionFileRepository
 
     public async ValueTask<ExtensionFileEntity> CreateFileAsync(string packageId, ExtensionFileEntity extensionFileEntity)
     {
-        var exists = await _context.GetNoTrackingSet<ExtensionFileEntity>().Include(x => x.ExtensionEntity)
+        var exists = await _context.GetNoTrackingSet<ExtensionFileEntity>()
+            .Include(x => x.ExtensionEntity)
             .AnyAsync(x => x.ExtensionEntity != null 
                            && x.ExtensionEntity.PackageId == packageId
                            && x.Version == extensionFileEntity.Version);
@@ -69,7 +71,6 @@ public class ExtensionFileRepository : IExtensionFileRepository
         }
 
         var extensionEntity = await _context.Set<ExtensionEntity>()
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
         
         if (extensionEntity == null)
