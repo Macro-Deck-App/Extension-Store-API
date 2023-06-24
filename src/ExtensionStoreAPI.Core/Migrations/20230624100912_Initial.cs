@@ -46,15 +46,15 @@ namespace ExtensionStoreAPI.Core.Migrations
                     d_id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     d_version = table.Column<string>(type: "text", nullable: false),
-                    d_ext_ref = table.Column<int>(type: "integer", nullable: false),
+                    e_ref = table.Column<int>(type: "integer", nullable: false),
                     d_created_timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_extension_downloads", x => x.d_id);
                     table.ForeignKey(
-                        name: "FK_extension_downloads_extensions_d_ext_ref",
-                        column: x => x.d_ext_ref,
+                        name: "FK_extension_downloads_extensions_e_ref",
+                        column: x => x.e_ref,
                         principalSchema: "extensionstore",
                         principalTable: "extensions",
                         principalColumn: "e_id",
@@ -77,15 +77,15 @@ namespace ExtensionStoreAPI.Core.Migrations
                     ef_license_name = table.Column<string>(type: "text", nullable: false),
                     ef_license_url = table.Column<string>(type: "text", nullable: false),
                     UploadDateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    ef_ext_ref = table.Column<int>(type: "integer", nullable: false),
+                    e_ref = table.Column<int>(type: "integer", nullable: false),
                     ef_created_timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_extension_files", x => x.ef_id);
                     table.ForeignKey(
-                        name: "FK_extension_files_extensions_ef_ext_ref",
-                        column: x => x.ef_ext_ref,
+                        name: "FK_extension_files_extensions_e_ref",
+                        column: x => x.e_ref,
                         principalSchema: "extensionstore",
                         principalTable: "extensions",
                         principalColumn: "e_id",
@@ -93,16 +93,16 @@ namespace ExtensionStoreAPI.Core.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_extension_downloads_d_ext_ref",
+                name: "IX_extension_downloads_e_ref",
                 schema: "extensionstore",
                 table: "extension_downloads",
-                column: "d_ext_ref");
+                column: "e_ref");
 
             migrationBuilder.CreateIndex(
-                name: "IX_extension_files_ef_ext_ref",
+                name: "IX_extension_files_e_ref",
                 schema: "extensionstore",
                 table: "extension_files",
-                column: "ef_ext_ref");
+                column: "e_ref");
         }
 
         /// <inheritdoc />

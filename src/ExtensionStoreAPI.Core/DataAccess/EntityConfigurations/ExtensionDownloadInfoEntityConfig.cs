@@ -23,6 +23,6 @@ public class ExtensionDownloadInfoEntityConfig : BaseCreatedEntityConfig<Extensi
             .IsRequired();
         
         builder.Property(p => p.ExtensionId)
-            .HasColumnName(ColumnPrefix + "ext_ref");
+            .HasColumnName("e_ref");
     }
 }

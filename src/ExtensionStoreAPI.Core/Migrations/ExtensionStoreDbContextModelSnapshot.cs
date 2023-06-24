@@ -42,7 +42,7 @@ namespace ExtensionStoreAPI.Core.Migrations
 
                     b.Property<int>("ExtensionId")
                         .HasColumnType("integer")
-                        .HasColumnName("d_ext_ref");
+                        .HasColumnName("e_ref");
 
                     b.HasKey("Id");
 
@@ -125,7 +125,7 @@ namespace ExtensionStoreAPI.Core.Migrations
 
                     b.Property<int>("ExtensionId")
                         .HasColumnType("integer")
-                        .HasColumnName("ef_ext_ref");
+                        .HasColumnName("e_ref");
 
                     b.Property<string>("FileHash")
                         .IsRequired()
