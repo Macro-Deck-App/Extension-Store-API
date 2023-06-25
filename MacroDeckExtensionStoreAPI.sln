@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI", "src\Ex
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI.Core", "src\ExtensionStoreAPI.Core\ExtensionStoreAPI.Core.csproj", "{66C77450-5F8E-41CE-9951-73AE418A1B40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI.Test.UnitTests", "tests\ExtensionStoreAPI.Test.UnitTests\ExtensionStoreAPI.Test.UnitTests.csproj", "{22D634B0-1302-4566-B427-4F7E88812B5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI.Tests.UnitTests", "tests\ExtensionStoreAPI.Tests.UnitTests\ExtensionStoreAPI.Tests.UnitTests.csproj", "{22D634B0-1302-4566-B427-4F7E88812B5D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{01ECF997-D820-4EB0-8E70-24FC08BBF49B}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{01
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 		.gitignore = .gitignore
+		Dockerfile = Dockerfile
+		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{06CD4758-F7EE-437A-9AEC-1EDB619E86A4}"
@@ -20,6 +22,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{
 		.github\workflows\deploy-develop.yml = .github\workflows\deploy-develop.yml
 		.github\workflows\tests.yml = .github\workflows\tests.yml
 		.github\workflows\deploy-production.yml = .github\workflows\deploy-production.yml
+		.github\workflows\base-image-build.yml = .github\workflows\base-image-build.yml
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\integration-tests.yml = .github\workflows\integration-tests.yml
+		.github\workflows\unit-tests.yml = .github\workflows\unit-tests.yml
+		.github\workflows\final-image-build.yml = .github\workflows\final-image-build.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DAD41D65-EB80-4BCE-ACF9-EC0B0A91432D}"

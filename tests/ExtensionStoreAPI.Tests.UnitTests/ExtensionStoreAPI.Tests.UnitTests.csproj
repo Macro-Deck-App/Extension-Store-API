@@ -3,6 +3,7 @@
     <PropertyGroup>
         <Nullable>disable</Nullable>
         <IsPackable>false</IsPackable>
+        <RootNamespace>ExtensionStoreAPI.Test.UnitTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

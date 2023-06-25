@@ -1,15 +1,19 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
-WORKDIR /App
+﻿ARG BASE_IMAGE
+FROM mcr.microsoft.com/dotnet/aspnet:7.0.5-bullseye-slim-amd64 AS base
+WORKDIR /app
 
-# Copy everything
-COPY . ./
-# Restore as distinct layers
-RUN dotnet restore
-# Build and publish a release
-RUN dotnet publish -c Release -o out
+FROM ${BASE_IMAGE} AS build
+WORKDIR /src/src/ExtensionStoreAPI/
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
-WORKDIR /App
-COPY --from=build-env /App/out .
-ENTRYPOINT ["dotnet", "MacroDeckExtensionStoreAPI.dll"]
+RUN dotnet msbuild "ExtensionStoreAPI.csproj" -warnAsMessage:CS0618 -warnAsError -p:Configuration=Release
+
+FROM build AS publish
+RUN dotnet publish -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app .
+
+RUN rm -f Config/config.json
+
+ENTRYPOINT ["dotnet", "ExtensionStoreAPI.dll" ]
