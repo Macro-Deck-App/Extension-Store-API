@@ -23,4 +23,8 @@
       <ProjectReference Include="..\ExtensionStoreAPI.Core\ExtensionStoreAPI.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="Migrations\*.sql" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
+    </ItemGroup>
+
 </Project>

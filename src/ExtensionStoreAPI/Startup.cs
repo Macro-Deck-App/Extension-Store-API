@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using ExtensionStoreAPI.Core;
 using ExtensionStoreAPI.Core.DataAccess;
 using ExtensionStoreAPI.Core.Interfaces;
@@ -25,8 +24,6 @@ public class Startup
         services.AddControllers()
             .AddJsonOptions(opt =>
             {
-                var enumConverter = new JsonStringEnumConverter();
-                opt.JsonSerializerOptions.Converters.Add(enumConverter);
                 opt.JsonSerializerOptions.AllowTrailingCommas = true;
             });
         services.AddApiVersioning(opt =>

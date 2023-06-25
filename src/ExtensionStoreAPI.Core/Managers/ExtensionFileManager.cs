@@ -7,7 +7,7 @@ using ExtensionStoreAPI.Core.DataTypes.MacroDeck;
 using ExtensionStoreAPI.Core.DataTypes.Request;
 using ExtensionStoreAPI.Core.DataTypes.Response;
 using ExtensionStoreAPI.Core.Enums;
-using ExtensionStoreAPI.Core.Exceptions;
+using ExtensionStoreAPI.Core.ErrorHandling;
 using ExtensionStoreAPI.Core.Interfaces;
 using ExtensionStoreAPI.Core.ManagerInterfaces;
 using ExtensionStoreAPI.Core.Utils;
@@ -59,7 +59,7 @@ public class ExtensionFileManager : IExtensionFileManager
         var extensionFileEntity = await _extensionFileRepository.GetFileAsync(packageId, version, targetApiVersion);
         if (extensionFileEntity == null)
         {
-            ErrorCodeExceptions.VersionNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.VersionNotFound);
         }
         var extensionFile = _mapper.Map<ExtensionFile>(extensionFileEntity);
         return extensionFile;
@@ -72,7 +72,7 @@ public class ExtensionFileManager : IExtensionFileManager
         if (!File.Exists(tmpFilePath))
         {
             _logger.Fatal("Cannot save package file from stream");
-            throw ErrorCodeExceptions.InternalErrorException();
+            throw new ErrorCodeException(ErrorCodes.InternalError);
         }
         
         var extensionManifest = await GetExtensionManifest(tmpFilePath);
@@ -89,7 +89,7 @@ public class ExtensionFileManager : IExtensionFileManager
             await _extensionFileRepository.ExistAsync(extensionManifest.PackageId!, extensionManifest.Version!);
         if (versionExists)
         {
-            throw ErrorCodeExceptions.VersionAlreadyExistsException();
+            throw new ErrorCodeException(ErrorCodes.VersionAlreadyExists);
         }
         
         var finalFileName = GenerateUniqueFileName(extensionManifest);
@@ -197,7 +197,7 @@ public class ExtensionFileManager : IExtensionFileManager
         if (iconMemoryStream == null)
         {
             _logger.Fatal("Failed to extract icon");
-            throw ErrorCodeExceptions.InternalErrorException();
+            throw new ErrorCodeException(ErrorCodes.InternalError);
         }
 
         var finalIconPath = Path.Combine(Paths.DataDirectory, iconFileName);
@@ -215,13 +215,13 @@ public class ExtensionFileManager : IExtensionFileManager
         var extensionManifest = await ExtensionManifest.FromZipFilePathAsync(path);
         if (extensionManifest == null)
         {
-            throw ErrorCodeExceptions.ExtensionManifestNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.ExtensionManifestNotFound);
         }
 
         if (string.IsNullOrWhiteSpace(extensionManifest.PackageId)
             || string.IsNullOrWhiteSpace(extensionManifest.Version))
         {
-            throw ErrorCodeExceptions.ExtensionManifestNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.ExtensionManifestInvalid);
         }
 
         return extensionManifest;
@@ -246,13 +246,13 @@ public class ExtensionFileManager : IExtensionFileManager
         var extensionFile = await _extensionFileRepository.GetFileAsync(packageId, version, targetApiVersion);
         if (extensionFile == null)
         {
-            throw ErrorCodeExceptions.VersionNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.VersionNotFound);
         }
         var filePath = Path.Combine(Paths.DataDirectory, extensionFile.PackageFileName);
         if (!File.Exists(filePath))
         {
             _logger.Fatal("Package for {PackageId} does not exist", packageId);
-            throw ErrorCodeExceptions.FileNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.FileNotFound);
         }
 
         try
@@ -263,7 +263,7 @@ public class ExtensionFileManager : IExtensionFileManager
         catch (Exception ex)
         {
             _logger.Fatal(ex, "Error while reading package file for {PackageId}", packageId);
-            throw ErrorCodeExceptions.InternalErrorException();
+            throw new ErrorCodeException(ErrorCodes.InternalError);
         }
     }
     

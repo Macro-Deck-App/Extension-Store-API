@@ -1,6 +1,6 @@
 using ExtensionStoreAPI.Core.Configuration;
 using ExtensionStoreAPI.Core.Helper;
-using ExtensionStoreAPI.Extensions;
+using ExtensionStoreAPI.Core.Utils;
 using ExtensionStoreAPI.Setup;
 using Serilog;
 
@@ -14,6 +14,7 @@ public static class Program
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
         await ExtensionStoreApiConfig.Initialize();
+        DatabaseMigrationUtil.MigrateDatabase();
         
         var app = Host.CreateDefaultBuilder(args)
             .ConfigureSerilog()
@@ -25,8 +26,7 @@ public static class Program
                     options.ListenAnyIP(EnvironmentHelper.HostingPort);
                 });
             }).Build();
-
-        await app.MigrateDatabaseAsync();
+        
         await app.RunAsync();
     }
     

@@ -2,7 +2,7 @@ using ExtensionStoreAPI.Core.DataAccess.Entities;
 using ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
 using ExtensionStoreAPI.Core.DataTypes.Request;
 using ExtensionStoreAPI.Core.DataTypes.Response;
-using ExtensionStoreAPI.Core.Exceptions;
+using ExtensionStoreAPI.Core.ErrorHandling;
 using ExtensionStoreAPI.Core.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -67,7 +67,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         
         if (exists)
         {
-            throw ErrorCodeExceptions.VersionAlreadyExistsException();
+            throw new ErrorCodeException(ErrorCodes.VersionAlreadyExists);
         }
 
         var extensionEntity = await _context.Set<ExtensionEntity>()
@@ -75,7 +75,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         
         if (extensionEntity == null)
         {
-            throw ErrorCodeExceptions.PackageIdNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
         
         extensionFileEntity.ExtensionId = extensionEntity.Id;

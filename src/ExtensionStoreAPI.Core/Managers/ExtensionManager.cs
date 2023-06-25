@@ -5,7 +5,7 @@ using ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
 using ExtensionStoreAPI.Core.DataTypes.ExtensionStore;
 using ExtensionStoreAPI.Core.DataTypes.Request;
 using ExtensionStoreAPI.Core.DataTypes.Response;
-using ExtensionStoreAPI.Core.Exceptions;
+using ExtensionStoreAPI.Core.ErrorHandling;
 using ExtensionStoreAPI.Core.ManagerInterfaces;
 using JetBrains.Annotations;
 using Serilog;
@@ -25,7 +25,6 @@ public class ExtensionManager : IExtensionManager
         IExtensionRepository extensionRepository,
         IExtensionFileRepository extensionFileRepository,
         IExtensionDownloadInfoRepository extensionDownloadInfoRepository,
-        IFileManager fileManager,
         IMapper mapper)
     {
         _extensionRepository = extensionRepository;
@@ -37,25 +36,23 @@ public class ExtensionManager : IExtensionManager
     public async ValueTask<Extension> GetByPackageIdAsync(string packageId)
     {
         var extensionEntity = await _extensionRepository.GetByPackageIdAsync(packageId);
-        if (extensionEntity == null)
+        if (extensionEntity is null)
         {
-            throw ErrorCodeExceptions.PackageIdNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
 
-        var extension = _mapper.Map<Extension>(extensionEntity);
-        return extension;
+        return _mapper.Map<Extension>(extensionEntity);
     }
 
     public async ValueTask<ExtensionSummary> GetSummaryByPackageIdAsync(string packageId)
     {
         var extensionEntity = await _extensionRepository.GetByPackageIdAsync(packageId);
-        if (extensionEntity == null)
+        if (extensionEntity is null)
         {
-            throw ErrorCodeExceptions.PackageIdNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
 
-        var extension = _mapper.Map<ExtensionSummary>(extensionEntity);
-        return extension;
+        return _mapper.Map<ExtensionSummary>(extensionEntity);
     }
 
     public async ValueTask<string[]> GetCategoriesAsync(Filter filter)
@@ -71,8 +68,7 @@ public class ExtensionManager : IExtensionManager
 
     public async ValueTask<bool> ExistsAsync(string packageId)
     {
-        var exists = await _extensionRepository.ExistAsync(packageId);
-        return exists;
+        return await _extensionRepository.ExistAsync(packageId);
     }
 
     public async ValueTask<PagedList<ExtensionSummary>> GetAllAsync(string? searchString, Filter? filter, Pagination pagination)
@@ -99,15 +95,15 @@ public class ExtensionManager : IExtensionManager
     public async ValueTask<FileStream> GetIconStreamAsync(string packageId)
     {
         var extensionFile = await _extensionFileRepository.GetFileAsync(packageId);
-        if (extensionFile == null)
+        if (extensionFile is null)
         {
-            throw ErrorCodeExceptions.PackageIdNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
         var iconPath = Path.Combine(Paths.DataDirectory, extensionFile.IconFileName);
         if (!File.Exists(iconPath))
         {
             _logger.Fatal("Icon file for {PackageId} does not exist", packageId);
-            throw ErrorCodeExceptions.IconNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.IconNotFound);
         }
 
         try
@@ -120,7 +116,7 @@ public class ExtensionManager : IExtensionManager
         catch (Exception ex)
         {
             _logger.Fatal(ex, "Cannot open icon for {PackageId}", packageId);
-            throw ErrorCodeExceptions.InternalErrorException();
+            throw new ErrorCodeException(ErrorCodes.InternalError);
         }
     }
 

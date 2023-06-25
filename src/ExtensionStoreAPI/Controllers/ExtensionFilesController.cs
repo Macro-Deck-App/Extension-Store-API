@@ -24,6 +24,6 @@ public class ExtensionFilesController : Controller
     {
         await using var stream = file.OpenReadStream();
         var result = await _extensionFileManager.CreateFileAsync(stream);
-        return Created("", result);
+        return Created(string.Empty, result);
     }
 }

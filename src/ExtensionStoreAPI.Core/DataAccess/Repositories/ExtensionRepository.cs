@@ -3,7 +3,7 @@ using ExtensionStoreAPI.Core.DataAccess.RepositoryInterfaces;
 using ExtensionStoreAPI.Core.DataTypes.Request;
 using ExtensionStoreAPI.Core.DataTypes.Response;
 using ExtensionStoreAPI.Core.Enums;
-using ExtensionStoreAPI.Core.Exceptions;
+using ExtensionStoreAPI.Core.ErrorHandling;
 using ExtensionStoreAPI.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,17 +56,17 @@ public class ExtensionRepository : IExtensionRepository
             searchString = searchString.ToLower().Trim();
 
             query = query.Where(x =>
-                x.PackageId.ToLower().Contains(searchString) ||
-                x.Name.ToLower().Contains(searchString) ||
-                x.Author.ToLower().Contains(searchString));
+                x.PackageId.ToLower().Contains(searchString)
+                || x.Name.ToLower().Contains(searchString)
+                || x.Author.ToLower().Contains(searchString));
         }
 
         if (filter is not null)
         {
             query = query.Where(
                 x => (filter.Category == null || x.Category == filter.Category) &&
-                     (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin ||
-                      filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack));
+                     (filter.ShowPlugins && x.ExtensionType == ExtensionType.Plugin
+                      || filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack));
         }
 
         return await query.ToPagedListAsync(pagination.Page, pagination.PageSize);
@@ -79,7 +79,7 @@ public class ExtensionRepository : IExtensionRepository
         
         if (exists)
         {
-            throw new InvalidOperationException();
+            throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
 
         return await _context.CreateAsync(extensionEntity);
@@ -90,9 +90,9 @@ public class ExtensionRepository : IExtensionRepository
         var extensionEntity = await _context.GetNoTrackingSet<ExtensionEntity>()
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
         
-        if (extensionEntity == null)
+        if (extensionEntity is null)
         {
-            throw ErrorCodeExceptions.PackageIdNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
 
         await _context.DeleteAsync<ExtensionEntity>(extensionEntity.Id);
@@ -105,7 +105,7 @@ public class ExtensionRepository : IExtensionRepository
         
         if (!exists)
         {
-            throw new InvalidOperationException();
+            throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
 
         return await _context.UpdateAsync(extensionEntity);
@@ -116,9 +116,9 @@ public class ExtensionRepository : IExtensionRepository
         var extensionEntity = await _context.Set<ExtensionEntity>()
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
         
-        if (extensionEntity == null)
+        if (extensionEntity is null)
         {
-            throw ErrorCodeExceptions.PackageIdNotFoundException();
+            throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
 
         extensionEntity.Description = description;

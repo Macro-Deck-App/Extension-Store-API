@@ -1,4 +1,4 @@
-using ExtensionStoreAPI.Core.Exceptions;
+using ExtensionStoreAPI.Core.ErrorHandling;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
@@ -28,17 +28,17 @@ public class ExceptionHandlingMiddleware
         }
     }
 
-    private async Task HandleException(HttpContext context, Exception exception)
+    private static async Task HandleException(HttpContext context, Exception exception)
     {
         if (exception.GetType() != typeof(ErrorCodeException))
         {
-            exception = ErrorCodeExceptions.InternalErrorException();
+            exception = new ErrorCodeException(ErrorCodes.InternalError);
         }
         
         var errorCodeException = exception as ErrorCodeException;
         var message = errorCodeException?.Message;
-        var errorCode = errorCodeException?.ErrorCode ?? 0;
-        var statusCode = errorCodeException?.StatusCode ?? StatusCodes.Status501NotImplemented;
+        var errorCode = errorCodeException?.ErrorCodes ?? 0;
+        var statusCode = errorCodeException?.StatusCode ?? StatusCodes.Status500InternalServerError;
         
         object errorMessage = new
         {
