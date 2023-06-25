@@ -6,7 +6,6 @@ namespace ExtensionStoreAPI.Core.Utils;
 
 public static class DatabaseMigrationUtil
 {
-    private static readonly ILogger Logger = Log.ForContext(typeof(DatabaseMigrationUtil));
     public static void MigrateDatabase()
     {
         try
@@ -14,7 +13,7 @@ public static class DatabaseMigrationUtil
             var connectionString = ExtensionStoreApiConfig.DatabaseConnectionStringOverride
                                    ?? ExtensionStoreApiConfig.DatabaseConnectionString;
             var connection = new Npgsql.NpgsqlConnection(connectionString);
-            var evolve = new Evolve(connection, msg => Logger.Information(msg))
+            var evolve = new Evolve(connection, Log.Information)
             {
                 Locations = new[] { "Migrations" },
                 IsEraseDisabled = true,
@@ -25,7 +24,7 @@ public static class DatabaseMigrationUtil
         }
         catch (Exception ex)
         {
-            Logger.Fatal(ex, "Database migration failed");
+            Log.Fatal(ex, "Database migration failed");
             throw;
         }
     }
