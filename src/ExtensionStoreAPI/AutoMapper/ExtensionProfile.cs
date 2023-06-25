@@ -18,9 +18,8 @@ public class ExtensionProfile : Profile
             .ForMember(dest => dest.Downloads, opt => opt.Ignore());
         
         CreateMap(typeof(PagedList<>), typeof(PagedList<>));
-        
-        CreateMap<ExtensionEntity, ExtensionSummary>()
-            .ForMember(dest => dest.TotalDownloads, opt => opt.Ignore());
+
+        CreateMap<ExtensionEntity, ExtensionSummary>();
 
         CreateMap<Extension, ExtensionSummary>()
             .ReverseMap();

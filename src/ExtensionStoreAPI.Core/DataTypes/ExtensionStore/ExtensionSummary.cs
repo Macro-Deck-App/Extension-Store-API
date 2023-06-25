@@ -11,6 +11,4 @@ public class ExtensionSummary
     public string Description { get; set; } = string.Empty;
     public string GitHubRepository { get; set; } = string.Empty;
     public string DSupportUserId { get; set; } = string.Empty;
-    public long TotalDownloads { get; set; }
-
 }

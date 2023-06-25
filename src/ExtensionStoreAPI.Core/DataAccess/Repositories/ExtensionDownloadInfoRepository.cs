@@ -59,7 +59,7 @@ public class ExtensionDownloadInfoRepository : IExtensionDownloadInfoRepository
         return await query.LongCountAsync();
     }
 
-    public async ValueTask<List<ExtensionDownloadInfoEntity>> GetTopDownloadsOfMonth(
+    public async ValueTask<List<ExtensionEntity>> GetTopDownloadsOfMonth(
         Filter? filter,
         int month,
         int year,
@@ -79,6 +79,6 @@ public class ExtensionDownloadInfoRepository : IExtensionDownloadInfoRepository
                                          && x.ExtensionEntity!.ExtensionType == ExtensionType.IconPack));
         }
 
-        return await query.ToListAsync();
+        return await query.Select(x => x.ExtensionEntity!).ToListAsync();
     }
 }

@@ -46,14 +46,14 @@ public class ApiV2ExtensionsController : ControllerBase
     }
 
     [HttpGet("topDownloads")]
-    public async Task<ActionResult<ApiV2ExtensionSummary[]>> GetTopDownloadsOfMonth(
+    public async Task<ActionResult<List<ApiV2ExtensionSummary>>> GetTopDownloadsOfMonth(
         [FromQuery] Filter filter,
         int month,
         int year,
         int count = 3)
     {
         var topDownloads = await _extensionManager.GetTopDownloadsOfMonth(filter, month, year, count);
-        return _mapper.Map<ApiV2ExtensionSummary[]>(topDownloads);
+        return _mapper.Map<List<ApiV2ExtensionSummary>>(topDownloads);
     }
 
     [HttpGet("{packageId}")]
