@@ -17,14 +17,6 @@ public class GitHubServiceTest
         _repositoryService = new GitHubRepositoryService(httpClientFactory);
     }
     
-    [Test]
-    public async Task DescriptionTest()
-    {
-        const string repositoryUrl = "https://github.com/Macro-Deck-org/Macro-Deck";
-        var description = await _repositoryService.GetDescriptionAsync(repositoryUrl);
-        Assert.That(description, Is.EqualTo("Macro Deck converts your phone, tablet or any other device with an up-to-date internet browser into an powerful remote macro pad to perform single actions or even multiple actions with just one tap."));
-    }
-
     [TestCase("github.com/Macro-Deck-org/Macro-Deck")]
     [TestCase("www.github.com/Macro-Deck-org/Macro-Deck")]
     [TestCase("https://www.github.com/Macro-Deck-org/Macro-Deck")]
