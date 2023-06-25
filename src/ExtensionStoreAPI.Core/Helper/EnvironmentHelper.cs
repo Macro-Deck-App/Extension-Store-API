@@ -1,4 +1,5 @@
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace ExtensionStoreAPI.Core.Helper;
 

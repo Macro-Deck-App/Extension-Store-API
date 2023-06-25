@@ -4,6 +4,7 @@ using ExtensionStoreAPI.Core.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace ExtensionStoreAPI.Core.Configuration;
 

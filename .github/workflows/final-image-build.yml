@@ -22,7 +22,7 @@ jobs:
         run: docker pull ghcr.io/macro-deck-app/extension-store-api-base:${{ github.sha }}
 
       - name: Build the Docker image
-        run: docker build ./src/MacroDeck.UpdateService --build-arg BASE_IMAGE=ghcr.io/macro-deck-app/extension_store_api_base:${{ github.sha }} --file ./src/MacroDeck.UpdateService/Dockerfile --tag ghcr.io/macro-deck-app/macro-deck-updateservice:${{ github.sha }}
+        run: docker build ./src/ExtensionStoreAPI --build-arg BASE_IMAGE=ghcr.io/macro-deck-app/extension_store_api_base:${{ github.sha }} --file ./src/ExtensionStoreAPI/Dockerfile --tag ghcr.io/macro-deck-app/extension-store-api:${{ github.sha }}
 
       - name: Push Docker image
         run: docker push ghcr.io/macro-deck-app/extension-store-api:${{ github.sha }}

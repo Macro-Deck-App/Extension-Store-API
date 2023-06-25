@@ -2,6 +2,7 @@ using ExtensionStoreAPI.Core.DataAccess;
 using ExtensionStoreAPI.Core.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace ExtensionStoreAPI.Core.Extensions;
 

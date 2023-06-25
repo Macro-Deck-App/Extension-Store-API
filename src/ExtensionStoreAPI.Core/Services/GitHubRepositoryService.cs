@@ -5,6 +5,7 @@ using ExtensionStoreAPI.Core.DataTypes.GitHub;
 using ExtensionStoreAPI.Core.Interfaces;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace ExtensionStoreAPI.Core.Services;
 

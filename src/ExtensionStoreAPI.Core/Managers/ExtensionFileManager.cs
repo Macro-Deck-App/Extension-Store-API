@@ -13,6 +13,7 @@ using ExtensionStoreAPI.Core.ManagerInterfaces;
 using ExtensionStoreAPI.Core.Utils;
 using JetBrains.Annotations;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace ExtensionStoreAPI.Core.Managers;
 

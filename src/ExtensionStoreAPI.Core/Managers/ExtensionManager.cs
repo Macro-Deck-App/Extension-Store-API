@@ -9,6 +9,7 @@ using ExtensionStoreAPI.Core.ErrorHandling;
 using ExtensionStoreAPI.Core.ManagerInterfaces;
 using JetBrains.Annotations;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace ExtensionStoreAPI.Core.Managers;
 

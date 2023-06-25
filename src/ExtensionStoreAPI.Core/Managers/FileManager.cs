@@ -1,5 +1,6 @@
 using ExtensionStoreAPI.Core.ManagerInterfaces;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace ExtensionStoreAPI.Core.Managers;
 

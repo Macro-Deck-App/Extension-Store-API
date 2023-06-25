@@ -1,5 +1,4 @@
 using ExtensionStoreAPI.Core.Extensions;
-using Microsoft.AspNetCore.Http;
 
 namespace ExtensionStoreAPI.Core.ErrorHandling;
 
@@ -11,7 +10,7 @@ public class ErrorCodeException : Exception
 
     public ErrorCodeException(ErrorCodes errorCodes)
     {
-        StatusCode = errorCodes.GetStatusCode() ?? StatusCodes.Status400BadRequest;
+        StatusCode = errorCodes.GetStatusCode() ?? 400;
         Message = errorCodes.GetDescription();
         ErrorCodes = errorCodes;
     }
