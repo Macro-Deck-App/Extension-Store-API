@@ -15,5 +15,6 @@ WORKDIR /app
 COPY --from=publish /app .
 
 RUN rm -f Config/config.json
+RUN mkdir -p Config
 
 ENTRYPOINT ["dotnet", "ExtensionStoreAPI.dll" ]
