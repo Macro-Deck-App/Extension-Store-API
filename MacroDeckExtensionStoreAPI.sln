@@ -20,7 +20,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{06CD4758-F7EE-437A-9AEC-1EDB619E86A4}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\deploy-develop.yml = .github\workflows\deploy-develop.yml
-		.github\workflows\tests.yml = .github\workflows\tests.yml
 		.github\workflows\deploy-production.yml = .github\workflows\deploy-production.yml
 		.github\workflows\base-image-build.yml = .github\workflows\base-image-build.yml
 		.github\workflows\ci.yml = .github\workflows\ci.yml
