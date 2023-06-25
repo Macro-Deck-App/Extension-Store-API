@@ -28,21 +28,25 @@ public class ExtensionStoreDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("extension_store");
+        
         var applyGenericMethod =
             typeof(ModelBuilder).GetMethod("ApplyConfiguration", BindingFlags.Instance | BindingFlags.Public);
-        foreach (var type in Assembly.GetExecutingAssembly().GetTypes()
-                     .Where(c => c is { IsClass: true, IsAbstract: false, ContainsGenericParameters: false })) 
+        
+        var types = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(c => c is { IsClass: true, IsAbstract: false, ContainsGenericParameters: false });
+        
+        foreach (var type in types) 
         {
             foreach (var i in type.GetInterfaces())
             {
-                if (!i.IsConstructedGenericType 
-                    || i.GetGenericTypeDefinition() != typeof(IEntityTypeConfiguration<>)) continue;
+                if (!i.IsConstructedGenericType || i.GetGenericTypeDefinition() != typeof(IEntityTypeConfiguration<>))
+                {
+                    continue;
+                }
                 
                 var applyConcreteMethod = applyGenericMethod?.MakeGenericMethod(i.GenericTypeArguments[0]);
-                applyConcreteMethod?.Invoke(modelBuilder, new []
-                {
-                    Activator.CreateInstance(type)
-                });
+                applyConcreteMethod?.Invoke(modelBuilder, new [] { Activator.CreateInstance(type) });
                 break;
             }
         }
