@@ -1,0 +1,19 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "MacroDeckExtensionStoreAPI": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:9000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "LocalDevelopment",
+        "HOSTING_PORT": "9000",
+        "CONFIG_NAME": "",
+        "CONFIGSERVICE_URL": "",
+        "CONFIGSERVICE_AUTHTOKEN": ""
+      }
+    }
+  }
+}

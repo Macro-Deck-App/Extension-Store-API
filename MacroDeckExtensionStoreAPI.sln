@@ -1,23 +1,36 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeckExtensionStoreAPI", "MacroDeckExtensionStoreAPI\MacroDeckExtensionStoreAPI.csproj", "{2C36E0FC-2B80-4EC1-82AA-EA7B79668B10}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI", "src\ExtensionStoreAPI\ExtensionStoreAPI.csproj", "{2C36E0FC-2B80-4EC1-82AA-EA7B79668B10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeckExtensionStoreLibrary", "MacroDeckExtensionStoreLibrary\MacroDeckExtensionStoreLibrary.csproj", "{66C77450-5F8E-41CE-9951-73AE418A1B40}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI.Core", "src\ExtensionStoreAPI.Core\ExtensionStoreAPI.Core.csproj", "{66C77450-5F8E-41CE-9951-73AE418A1B40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeckExtensionStoreTests", "MacroDeckExtensionStoreTests\MacroDeckExtensionStoreTests.csproj", "{22D634B0-1302-4566-B427-4F7E88812B5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI.Tests.UnitTests", "tests\ExtensionStoreAPI.Tests.UnitTests\ExtensionStoreAPI.Tests.UnitTests.csproj", "{22D634B0-1302-4566-B427-4F7E88812B5D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{01ECF997-D820-4EB0-8E70-24FC08BBF49B}"
 	ProjectSection(SolutionItems) = preProject
 		global.json = global.json
 		renovate.json = renovate.json
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+		.gitignore = .gitignore
+		Dockerfile = Dockerfile
+		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{06CD4758-F7EE-437A-9AEC-1EDB619E86A4}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\deploy-develop.yml = .github\workflows\deploy-develop.yml
-		.github\workflows\tests.yml = .github\workflows\tests.yml
 		.github\workflows\deploy-production.yml = .github\workflows\deploy-production.yml
+		.github\workflows\base-image-build.yml = .github\workflows\base-image-build.yml
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\integration-tests.yml = .github\workflows\integration-tests.yml
+		.github\workflows\unit-tests.yml = .github\workflows\unit-tests.yml
+		.github\workflows\final-image-build.yml = .github\workflows\final-image-build.yml
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DAD41D65-EB80-4BCE-ACF9-EC0B0A91432D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7FD0044E-7462-4C27-8457-60E5479421D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,5 +50,10 @@ Global
 		{22D634B0-1302-4566-B427-4F7E88812B5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22D634B0-1302-4566-B427-4F7E88812B5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22D634B0-1302-4566-B427-4F7E88812B5D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2C36E0FC-2B80-4EC1-82AA-EA7B79668B10} = {DAD41D65-EB80-4BCE-ACF9-EC0B0A91432D}
+		{66C77450-5F8E-41CE-9951-73AE418A1B40} = {DAD41D65-EB80-4BCE-ACF9-EC0B0A91432D}
+		{22D634B0-1302-4566-B427-4F7E88812B5D} = {7FD0044E-7462-4C27-8457-60E5479421D6}
 	EndGlobalSection
 EndGlobal

@@ -6,25 +6,15 @@ on:
     branches: [ "develop" ]
       
 jobs:
-  tests:
-    uses: ./.github/workflows/tests.yml
+  ci:
+    uses: ./.github/workflows/ci.yml
     name: Build and test
+    
   deploy:
     name: Build and deploy Docker image
-    needs: [tests]
+    needs: [ci]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file MacroDeckExtensionStoreAPI/Dockerfile --tag suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
-    - name: Log into registry
-      uses: docker/login-action@40891eba8c2bcd1309b07ba8b11232f313e86779
-      with:
-        registry: docker.io
-        username: suchbyte
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Push the Docker image
-      run: docker push suchbyte/macro-deck-extensionstoreapi:dev_${{ github.sha }}
     - name: Updating the image on the server
       uses: appleboy/ssh-action@v0.1.8
       with:
@@ -34,7 +24,8 @@ jobs:
         port: ${{ secrets.DOCKER_HOST_PORT }}
         script: |
           cd "scripts/ExtensionStoreAPI/"
-          ./update_develop.sh dev_${{ github.sha }}
+          ./update_develop.sh ${{ github.sha }}
+          
     - uses: fjogeleit/http-request-action@v1
       with:
         url: 'https://bot.api.macro-deck.app/webhook/extensionstoreapi-workflow'
