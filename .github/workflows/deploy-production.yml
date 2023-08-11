@@ -22,7 +22,7 @@ jobs:
           password: ${{ secrets.GITHUBWORKFLOWS_USER_PASSWORD }}
           port: ${{ secrets.DOCKER_HOST_PORT }}
           script: |
-            cd "scripts/ExtensionStoreAPI/"
+            cd "scripts/extension-store-api/"
             ./update_production.sh ${{ github.sha }}
             
       - uses: fjogeleit/http-request-action@v1

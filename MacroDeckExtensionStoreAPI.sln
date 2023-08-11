@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI.Core", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI.Tests.UnitTests", "tests\ExtensionStoreAPI.Tests.UnitTests\ExtensionStoreAPI.Tests.UnitTests.csproj", "{22D634B0-1302-4566-B427-4F7E88812B5D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{01ECF997-D820-4EB0-8E70-24FC08BBF49B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{01ECF997-D820-4EB0-8E70-24FC08BBF49B}"
 	ProjectSection(SolutionItems) = preProject
 		global.json = global.json
 		renovate.json = renovate.json
@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{01
 		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{06CD4758-F7EE-437A-9AEC-1EDB619E86A4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{06CD4758-F7EE-437A-9AEC-1EDB619E86A4}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\deploy-develop.yml = .github\workflows\deploy-develop.yml
 		.github\workflows\deploy-production.yml = .github\workflows\deploy-production.yml

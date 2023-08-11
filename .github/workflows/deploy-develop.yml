@@ -23,7 +23,7 @@ jobs:
         password: ${{ secrets.GITHUBWORKFLOWS_USER_PASSWORD }}
         port: ${{ secrets.DOCKER_HOST_PORT }}
         script: |
-          cd "scripts/ExtensionStoreAPI/"
+          cd "scripts/extension-store-api/"
           ./update_develop.sh ${{ github.sha }}
           
     - uses: fjogeleit/http-request-action@v1
@@ -33,4 +33,3 @@ jobs:
         bearerToken:  ${{ secrets.WEBHOOK_KEY }}
         customHeaders: '{"Content-Type": "application/json" }'
         data: '{"toEveryone":false,"embed":{"color":{"r":0,"g":1,"b":0},"description":"https://test.extensionstore.api.macro-deck.app is now on dev_${{ github.sha }}.","fields":[{"name":"Branch","value":"Develop","inline":false},{"name":"SHA","value":"${{ github.sha }}","inline":false}]}}'
-    
