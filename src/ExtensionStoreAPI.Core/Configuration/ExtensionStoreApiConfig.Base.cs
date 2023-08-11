@@ -15,6 +15,8 @@ public partial class ExtensionStoreApiConfig
     private static IConfiguration? Configuration { get; set; }
 
     private const string ConfigPath = "Config/config.json";
+
+    private static int CurrentConfigVersion { get; set; } = -1;
     
     public static async ValueTask Initialize()
     {
@@ -25,6 +27,7 @@ public partial class ExtensionStoreApiConfig
             Logger.Information(
                 "Service was started in staging or production environment. Will download config from ConfigService");
             await UpdateConfig(ConfigPath, CancellationToken.None);
+            StartUpdateLoop();
         }
 
         var configBuilder = new ConfigurationBuilder();
@@ -61,6 +64,38 @@ public partial class ExtensionStoreApiConfig
         Logger.Fatal("Cannot find value in config for {Key}", key);
         return string.Empty;
     }
+    
+    private static void StartUpdateLoop()
+    {
+        Task.Run(async () => await UpdateLoop(CancellationToken.None));
+    }
+
+    private static async Task UpdateLoop(CancellationToken cancellationToken)
+    {
+        do
+        {
+            await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+            var latestConfigVersion = await GetLatestConfigVersion();
+            if (latestConfigVersion == CurrentConfigVersion)
+            {
+                continue;
+            }
+            
+            await UpdateConfig(ConfigPath, cancellationToken);
+        } while (!cancellationToken.IsCancellationRequested);
+    }
+
+    private static async Task<int> GetLatestConfigVersion()
+    {
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("x-config-name", new[] { EnvironmentHelper.ConfigServiceConfigName });
+        httpClient.DefaultRequestHeaders.Add("x-config-access-token",
+            new[] { EnvironmentHelper.ConfigServiceAuthToken });
+
+        var response = await httpClient.GetAsync($"{EnvironmentHelper.ConfigServiceUrl}/config/version");
+        var resultString = await response.Content.ReadAsStringAsync();
+        return int.TryParse(resultString, out var result) ? result : 0;
+    }
 
     private static async ValueTask UpdateConfig(string configPath, CancellationToken cancellationToken)
     {
@@ -68,8 +103,9 @@ public partial class ExtensionStoreApiConfig
         {
             var encodedConfig = await DownloadFromConfigService();
             var configJson = Base64Utils.Base64Decode(encodedConfig.ConfigBase64 ?? string.Empty);
-
+            
             await File.WriteAllTextAsync(configPath, configJson, cancellationToken);
+            CurrentConfigVersion = encodedConfig.Version;
             Logger.Information("Config version {Version} downloaded from ConfigService", encodedConfig.Version);
         }
         catch (Exception ex)
