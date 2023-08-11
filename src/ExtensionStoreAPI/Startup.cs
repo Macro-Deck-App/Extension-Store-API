@@ -21,6 +21,16 @@ public class Startup
         services.AddScoped<IGitHubRepositoryService, GitHubRepositoryService>();
         services.AddEndpointsApiExplorer();
         services.AddSwagger();
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAny",
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+        });
         services.AddControllers()
             .AddJsonOptions(opt =>
             {

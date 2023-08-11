@@ -19,10 +19,10 @@ public class PagedList<T>
 
     public static async ValueTask<PagedList<T>> CreatePagedListAsync(IQueryable<T> query, int page, int pageSize)
     {
-        query = query.Skip((page - 1) * pageSize).Take(pageSize);
-        
-        var items = await query.ToListAsync();
         var totalItems = await query.CountAsync();
+        var items = await query.Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
 
         return new PagedList<T>(items, page, pageSize, totalItems);
     }
