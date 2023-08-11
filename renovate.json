@@ -6,6 +6,11 @@
   "baseBranches": ["develop"],
   "packageRules": [
     {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "stabilityDays": 14
+      "automerge": true
+    },
+    {
       "matchPackageNames": ["nuget"],
       "stabilityDays": 14
     }
