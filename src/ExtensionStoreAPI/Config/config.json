@@ -1,0 +1,8 @@
+{
+  "database": {
+    "connection_string": "User ID=extensionstoremaster;Password=test;Database=extensionstoretest;Host=127.0.0.1;Port=5432"
+  },
+  "authentication": {
+    "admin_token": "test"
+  }
+}

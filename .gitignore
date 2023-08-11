@@ -370,3 +370,6 @@ riderModule.iml
 /_ReSharper.Caches/
 appsettings.json
 appsettings.*.json
+storage/
+storage/*
+/src/ExtensionStoreAPI/storage/
