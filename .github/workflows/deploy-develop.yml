@@ -12,24 +12,24 @@ jobs:
     
   deploy:
     name: Build and deploy Docker image
+    environment: staging
     needs: [ci]
     runs-on: ubuntu-latest
     steps:
-    - name: Updating the image on the server
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.DOCKER_HOST }}
-        username: ${{ secrets.GITHUBWORKFLOWS_USER }}
-        password: ${{ secrets.GITHUBWORKFLOWS_USER_PASSWORD }}
-        port: ${{ secrets.DOCKER_HOST_PORT }}
-        script: |
-          cd "scripts/extension-store-api/"
-          ./update_develop.sh ${{ github.sha }}
+      - name: Updating the image on the server
+        uses:  Macro-Deck-App/Actions/deploy@main
+        with:
+          host: ${{ secrets.TEST_DEPLOY_HOST }}
+          user: ${{ secrets.TEST_DEPLOY_USER }}
+          key: ${{ secrets.TEST_DEPLOY_KEY }}
+          known-hosts: ${{ secrets.TEST_DEPLOY_KNOWN_HOSTS }}
+          sha: ${{ github.sha }}
+          service: extension-store-api
           
-    - uses: fjogeleit/http-request-action@v1
-      with:
-        url: 'https://bot.api.macro-deck.app/webhook/extensionstoreapi-workflow'
-        method: 'POST'
-        bearerToken:  ${{ secrets.WEBHOOK_KEY }}
-        customHeaders: '{"Content-Type": "application/json" }'
-        data: '{"toEveryone":false,"embed":{"color":{"r":0,"g":1,"b":0},"description":"https://test.extensionstore.api.macro-deck.app is now on dev_${{ github.sha }}.","fields":[{"name":"Branch","value":"Develop","inline":false},{"name":"SHA","value":"${{ github.sha }}","inline":false}]}}'
+      - uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://bot.api.macro-deck.app/webhook/extensionstoreapi-workflow'
+          method: 'POST'
+          bearerToken:  ${{ secrets.WEBHOOK_KEY }}
+          customHeaders: '{"Content-Type": "application/json" }'
+          data: '{"toEveryone":false,"embed":{"color":{"r":0,"g":1,"b":0},"description":"https://test.extensionstore.api.macro-deck.app is now on dev_${{ github.sha }}.","fields":[{"name":"Branch","value":"Develop","inline":false},{"name":"SHA","value":"${{ github.sha }}","inline":false}]}}'

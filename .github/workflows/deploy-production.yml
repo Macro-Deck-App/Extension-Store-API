@@ -11,19 +11,19 @@ jobs:
   
   deploy:
     name: Build and deploy Docker image
+    environment: production
     needs: [ci]
     runs-on: ubuntu-latest
     steps:
       - name: Updating the image on the server
-        uses: appleboy/ssh-action@v0.1.10
+        uses:  Macro-Deck-App/Actions/deploy@main
         with:
-          host: ${{ secrets.DOCKER_HOST }}
-          username: ${{ secrets.GITHUBWORKFLOWS_USER }}
-          password: ${{ secrets.GITHUBWORKFLOWS_USER_PASSWORD }}
-          port: ${{ secrets.DOCKER_HOST_PORT }}
-          script: |
-            cd "scripts/extension-store-api/"
-            ./update_production.sh ${{ github.sha }}
+          host: ${{ secrets.LIVE_DEPLOY_HOST }}
+          user: ${{ secrets.LIVE_DEPLOY_USER }}
+          key: ${{ secrets.LIVE_DEPLOY_KEY }}
+          known-hosts: ${{ secrets.LIVE_DEPLOY_KNOWN_HOSTS }}
+          sha: ${{ github.sha }}
+          service: extension-store-api
             
       - uses: fjogeleit/http-request-action@v1
         with:

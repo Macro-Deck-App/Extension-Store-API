@@ -41,19 +41,11 @@ public class ExtensionFileRepository : IExtensionFileRepository
         string? version = null,
         int? targetApiVersion = null)
     {
-        if (version is null)
-        {
-            return await _context.GetNoTrackingSet<ExtensionFileEntity>()
-                .FilterTargetApiVersion(targetApiVersion)
-                .OrderByDescending(x => x.Version)
-                .FirstOrDefaultAsync(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId);
-        }
-
         return await _context.Set<ExtensionFileEntity>().Include(x => x.ExtensionEntity)
             .FilterTargetApiVersion(targetApiVersion)
+            .FilterFileVersion(version)
             .Where(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId)
             .OrderByDescending(x => x.Version)
-            .Take(1)
             .FirstOrDefaultAsync();
     }
 
