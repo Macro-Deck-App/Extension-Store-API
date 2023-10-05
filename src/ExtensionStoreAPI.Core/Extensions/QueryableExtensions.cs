@@ -18,4 +18,13 @@ public static class QueryableExtensions
             ? query
             : query.Where(x => x.MinApiVersion <= targetApiVersion);
     }
+    
+    public static IQueryable<ExtensionFileEntity> FilterFileVersion(
+        this IQueryable<ExtensionFileEntity> query,
+        string? fileVersion)
+    {
+        return string.IsNullOrWhiteSpace(fileVersion) 
+            ? query
+            : query.Where(x => x.Version == fileVersion);
+    }
 }
