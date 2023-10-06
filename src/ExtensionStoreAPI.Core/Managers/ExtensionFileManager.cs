@@ -147,21 +147,33 @@ public class ExtensionFileManager : IExtensionFileManager
 
         var result = new ExtensionFileUploadResult
         {
+            Name = extensionManifest.Name!,
+            Author = extensionManifest.Author!,
+            Repository = extensionManifest.Repository!,
+            MinApiVersion = extensionManifest.TargetPluginApiVersion!.Value,
             Success = true,
             NewPlugin = !extensionExists,
-            ExtensionManifest = extensionManifest,
             PackageFileName = packageFileName,
             IconFileName = iconFileName,
             FileHash = fileHash,
             LicenseName = license.Name,
             LicenseUrl = license.Url,
-            Readme = readme,
             Description = description,
-            NewVersion = extensionManifest.Version,
-            CurrentVersion = currentFile?.Version
+            NewVersion = extensionManifest.Version!,
+            CurrentVersion = currentFile?.Version ?? string.Empty
         };
 
-        var extensionFileEntity = _mapper.Map<ExtensionFileEntity>(result);
+        var extensionFileEntity = new ExtensionFileEntity
+        {
+            Version = extensionManifest.Version!,
+            MinApiVersion = extensionManifest.TargetPluginApiVersion!.Value,
+            PackageFileName = packageFileName,
+            IconFileName = iconFileName,
+            FileHash = fileHash,
+            LicenseName = license.Name,
+            LicenseUrl = license.Url,
+            Readme = readme
+        };
 
         try
         {
@@ -220,7 +232,11 @@ public class ExtensionFileManager : IExtensionFileManager
         }
 
         if (string.IsNullOrWhiteSpace(extensionManifest.PackageId)
-            || string.IsNullOrWhiteSpace(extensionManifest.Version))
+            || string.IsNullOrWhiteSpace(extensionManifest.Version)
+            || string.IsNullOrWhiteSpace(extensionManifest.Author)
+            || string.IsNullOrWhiteSpace(extensionManifest.Name)
+            || string.IsNullOrWhiteSpace(extensionManifest.Repository)
+            || !extensionManifest.TargetPluginApiVersion.HasValue)
         {
             throw new ErrorCodeException(ErrorCodes.ExtensionManifestInvalid);
         }

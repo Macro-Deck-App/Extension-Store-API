@@ -23,7 +23,7 @@ public static class QueryableExtensions
         this IQueryable<ExtensionFileEntity> query,
         string? fileVersion)
     {
-        return !string.IsNullOrWhiteSpace(fileVersion) 
+        return string.IsNullOrWhiteSpace(fileVersion) 
             ? query
             : query.Where(x => x.Version == fileVersion);
     }

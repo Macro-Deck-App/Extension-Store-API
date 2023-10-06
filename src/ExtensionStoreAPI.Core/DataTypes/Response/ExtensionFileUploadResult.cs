@@ -1,19 +1,19 @@
-using ExtensionStoreAPI.Core.DataTypes.MacroDeck;
-
 namespace ExtensionStoreAPI.Core.DataTypes.Response;
 
 public class ExtensionFileUploadResult
 {
-    public ExtensionManifest? ExtensionManifest { get; set; }
-    public string? Readme { get; set; }
-    public string? Description { get; set; }
-    public string? PackageFileName { get; set; }
-    public string? IconFileName { get; set; }
-    public string? FileHash { get; set; }
-    public string? LicenseName { get; set; }
-    public string? LicenseUrl { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public string Repository { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string PackageFileName { get; set; } = string.Empty;
+    public string IconFileName { get; set; } = string.Empty;
+    public string FileHash { get; set; } = string.Empty;
+    public string LicenseName { get; set; } = string.Empty;
+    public string LicenseUrl { get; set; } = string.Empty;
     public bool Success { get; set; }
     public bool NewPlugin { get; set; }
-    public string? CurrentVersion { get; set; }
-    public string? NewVersion { get; set; }
+    public string CurrentVersion { get; set; } = string.Empty;
+    public string NewVersion { get; set; } = string.Empty;
+    public int MinApiVersion { get; set; }
 }
