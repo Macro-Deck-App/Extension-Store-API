@@ -14,4 +14,5 @@ public interface IExtensionRepository
     public ValueTask DeleteExtensionAsync(string packageId);
     public ValueTask<ExtensionEntity> UpdateExtensionAsync(ExtensionEntity extensionEntity);
     public ValueTask UpdateDescription(string packageId, string description);
+    public Task UpdateAuthorDiscordUserId(string extensionManifestPackageId, ulong? extensionManifestAuthorDiscordUserId);
 }

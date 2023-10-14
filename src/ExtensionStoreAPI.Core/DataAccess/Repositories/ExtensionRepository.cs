@@ -125,4 +125,16 @@ public class ExtensionRepository : IExtensionRepository
         
         await _context.UpdateAsync(extensionEntity);
     }
+
+    public async Task UpdateAuthorDiscordUserId(string packageId, ulong? extensionManifestAuthorDiscordUserId)
+    {
+        if (!extensionManifestAuthorDiscordUserId.HasValue)
+        {
+            return;
+        }
+        
+        await _context.Set<ExtensionEntity>()
+            .Where(x => x.PackageId == packageId)
+            .ExecuteUpdateAsync(x => x.SetProperty(e => e.DSupportUserId, extensionManifestAuthorDiscordUserId.Value));
+    }
 }
