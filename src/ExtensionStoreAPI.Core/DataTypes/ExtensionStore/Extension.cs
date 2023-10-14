@@ -11,6 +11,6 @@ public class Extension
     public string? Description { get; set; }
     public string? Category { get; set; }
     public string? GitHubRepository { get; set; }
-    public string? DSupportUserId { get; set; }
+    public ulong? DSupportUserId { get; set; }
     public IList<ExtensionFile>? ExtensionFiles { get; set; }
 }
