@@ -21,7 +21,7 @@ public class ExtensionManifest
      public string? Category { get; set; }
 
      [JsonPropertyName("author-discord-userid")]
-     public string? AuthorDiscordUserId { get; set; }
+     public ulong? AuthorDiscordUserId { get; set; }
 
      [JsonPropertyName("repository")]
      public string? Repository { get; set; } = "";

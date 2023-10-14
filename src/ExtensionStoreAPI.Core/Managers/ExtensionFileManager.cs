@@ -192,6 +192,8 @@ public class ExtensionFileManager : IExtensionFileManager
         }
         
         await _extensionRepository.UpdateDescription(extensionManifest.PackageId!, description);
+        await _extensionRepository.UpdateAuthorDiscordUserId(extensionManifest.PackageId!,
+            extensionManifest.AuthorDiscordUserId);
         return result;
     }
 
