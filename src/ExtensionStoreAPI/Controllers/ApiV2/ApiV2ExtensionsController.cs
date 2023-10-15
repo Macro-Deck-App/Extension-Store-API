@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using AutoMapper;
 using ExtensionStoreAPI.Core.DataTypes.ApiV2;
 using ExtensionStoreAPI.Core.DataTypes.Request;
@@ -74,6 +75,13 @@ public class ApiV2ExtensionsController : ControllerBase
     public async Task<ActionResult<FileStream>> GetIconAsync(string packageId)
     {
         var iconFileStream = await _extensionManager.GetIconStreamAsync(packageId);
-        return File(iconFileStream, "image/jpg");
+        var contentDisposition = new ContentDisposition
+        {
+            FileName = "icon.png",
+            Inline = false
+        };
+        Response.Headers.Add("Content-Disposition", contentDisposition.ToString());
+
+        return File(iconFileStream, "image/png");
     }
 }
