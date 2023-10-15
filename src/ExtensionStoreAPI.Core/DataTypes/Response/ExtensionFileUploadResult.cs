@@ -2,6 +2,7 @@ namespace ExtensionStoreAPI.Core.DataTypes.Response;
 
 public class ExtensionFileUploadResult
 {
+    public string PackageId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Author { get; set; } = string.Empty;
     public string Repository { get; set; } = string.Empty;
