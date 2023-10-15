@@ -147,6 +147,7 @@ public class ExtensionFileManager : IExtensionFileManager
 
         var result = new ExtensionFileUploadResult
         {
+            PackageId = extensionManifest.PackageId!,
             Name = extensionManifest.Name!,
             Author = extensionManifest.Author!,
             Repository = extensionManifest.Repository!,
