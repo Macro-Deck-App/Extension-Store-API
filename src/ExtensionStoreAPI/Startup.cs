@@ -47,6 +47,7 @@ public class Startup
             opt.GroupNameFormat = "'v'VVV";
             opt.SubstituteApiVersionInUrl = true;
         });
+        services.AddMetricsConfiguration();
     }
     
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -62,6 +63,7 @@ public class Startup
         app.UseRouting();
         app.UseEndpoints(endpoints =>
         {
+            endpoints.MapPrometheusScrapingEndpoint();
             endpoints.MapControllers();
         });
         app.ConfigureSwagger();

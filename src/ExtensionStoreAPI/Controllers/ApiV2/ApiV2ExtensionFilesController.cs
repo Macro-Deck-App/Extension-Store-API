@@ -34,7 +34,7 @@ public class ApiV2ExtensionFilesController : ControllerBase
     {
         var pagination = new Pagination(page ?? 1, pageSize ?? 20);
         var extensionFiles = await _extensionFileManager.GetFilesAsync(packageId, pagination);
-        return _mapper.Map<PagedList<ApiV2ExtensionFile>>(extensionFiles);
+        return _mapper.Map<PagedList<ApiV2ExtensionFile>>(extensionFiles)!;
     }
 
     [HttpGet("{packageId}")]
@@ -44,7 +44,7 @@ public class ApiV2ExtensionFilesController : ControllerBase
         [FromQuery] int? apiVersion = null)
     {
         var extensionFile = await _extensionFileManager.GetFileAsync(packageId, fileVersion, apiVersion);
-        return _mapper.Map<ApiV2ExtensionFile>(extensionFile);
+        return _mapper.Map<ApiV2ExtensionFile>(extensionFile)!;
     }
 
     [HttpGet("download/{packageId}")]

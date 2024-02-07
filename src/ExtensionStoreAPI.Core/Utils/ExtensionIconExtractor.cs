@@ -1,6 +1,9 @@
 using System.IO.Compression;
 using System.Text;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace ExtensionStoreAPI.Core.Utils;
 

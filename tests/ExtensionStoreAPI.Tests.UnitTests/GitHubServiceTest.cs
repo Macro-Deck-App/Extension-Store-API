@@ -1,6 +1,6 @@
 using ExtensionStoreAPI.Core.Interfaces;
 using ExtensionStoreAPI.Core.Services;
-using Moq;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace ExtensionStoreAPI.Test.UnitTests;
@@ -11,10 +11,9 @@ public class GitHubServiceTest
 
     public GitHubServiceTest()
     {
-        var mockFactory = new Mock<IHttpClientFactory>();
-        mockFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
-        var httpClientFactory = mockFactory.Object;
-        _repositoryService = new GitHubRepositoryService(httpClientFactory);
+        var httpClientFactoryMock = Substitute.For<IHttpClientFactory>();
+        httpClientFactoryMock.CreateClient(Arg.Any<string>()).Returns(new HttpClient());
+        _repositoryService = new GitHubRepositoryService(httpClientFactoryMock);
     }
     
     [TestCase("github.com/Macro-Deck-org/Macro-Deck")]

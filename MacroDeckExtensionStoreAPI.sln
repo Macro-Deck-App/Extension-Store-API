@@ -8,7 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionStoreAPI.Tests.Uni
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{01ECF997-D820-4EB0-8E70-24FC08BBF49B}"
 	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
 		renovate.json = renovate.json
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props

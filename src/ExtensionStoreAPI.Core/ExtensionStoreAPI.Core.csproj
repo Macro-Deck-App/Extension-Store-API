@@ -2,7 +2,6 @@
 
     <ItemGroup>
       <PackageReference Include="AutoMapper" />
-      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
       <PackageReference Include="Evolve" />
       <PackageReference Include="JetBrains.Annotations" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" />

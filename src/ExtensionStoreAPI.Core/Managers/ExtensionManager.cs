@@ -42,7 +42,7 @@ public class ExtensionManager : IExtensionManager
             throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
 
-        return _mapper.Map<Extension>(extensionEntity);
+        return _mapper.Map<Extension>(extensionEntity)!;
     }
 
     public async ValueTask<ExtensionSummary> GetSummaryByPackageIdAsync(string packageId)
@@ -53,7 +53,7 @@ public class ExtensionManager : IExtensionManager
             throw new ErrorCodeException(ErrorCodes.PackageIdNotFound);
         }
 
-        return _mapper.Map<ExtensionSummary>(extensionEntity);
+        return _mapper.Map<ExtensionSummary>(extensionEntity)!;
     }
 
     public async ValueTask<string[]> GetCategoriesAsync(Filter filter)
@@ -64,7 +64,7 @@ public class ExtensionManager : IExtensionManager
     public async ValueTask<List<ExtensionSummary>> GetTopDownloadsOfMonth(Filter filter, int month, int year, int count)
     {
         var topEntities = await _extensionDownloadInfoRepository.GetTopDownloadsOfMonth(filter, month, year, count);
-        return _mapper.Map<List<ExtensionSummary>>(topEntities);
+        return _mapper.Map<List<ExtensionSummary>>(topEntities)!;
     }
 
     public async ValueTask<bool> ExistsAsync(string packageId)
@@ -75,14 +75,14 @@ public class ExtensionManager : IExtensionManager
     public async ValueTask<PagedList<ExtensionSummary>> GetAllAsync(string? searchString, Filter? filter, Pagination pagination)
     {
         var extensionEntities = await _extensionRepository.GetAllAsync(searchString, filter, pagination);
-        return _mapper.Map<PagedList<ExtensionSummary>>(extensionEntities);
+        return _mapper.Map<PagedList<ExtensionSummary>>(extensionEntities)!;
     }
 
     public async ValueTask CreateAsync(Extension extension)
     {
         try
         {
-            var extensionEntity = _mapper.Map<ExtensionEntity>(extension);
+            var extensionEntity = _mapper.Map<ExtensionEntity>(extension)!;
             extensionEntity.Category = FixCategoryName(extensionEntity.Category);
             await _extensionRepository.CreateExtensionAsync(extensionEntity);
             _logger.Information("Created extension {PackageId}", extension.PackageId);

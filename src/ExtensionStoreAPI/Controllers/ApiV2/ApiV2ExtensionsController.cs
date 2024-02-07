@@ -36,7 +36,7 @@ public class ApiV2ExtensionsController : ControllerBase
     {
         var pagination = new Pagination(page ?? 1, pageSize ?? 20);
         var extensionSummaries = await _extensionManager.GetAllAsync(searchString, filter, pagination);
-        return _mapper.Map<PagedList<ApiV2ExtensionSummary>>(extensionSummaries);
+        return _mapper.Map<PagedList<ApiV2ExtensionSummary>>(extensionSummaries)!;
     }
 
     [HttpGet("categories")]
@@ -54,21 +54,21 @@ public class ApiV2ExtensionsController : ControllerBase
         int count = 3)
     {
         var topDownloads = await _extensionManager.GetTopDownloadsOfMonth(filter, month, year, count);
-        return _mapper.Map<List<ApiV2ExtensionSummary>>(topDownloads);
+        return _mapper.Map<List<ApiV2ExtensionSummary>>(topDownloads)!;
     }
 
     [HttpGet("{packageId}")]
     public async Task<ActionResult<ApiV2Extension>> GetExtensionByPackageIdAsync(string packageId)
     {
         var extension = await _extensionManager.GetByPackageIdAsync(packageId);
-        return _mapper.Map<ApiV2Extension>(extension);
+        return _mapper.Map<ApiV2Extension>(extension)!;
     }
     
     [HttpGet("{packageId}/summary")]
     public async Task<ActionResult<ApiV2ExtensionSummary>> GetExtensionSummaryByPackageIdAsync(string packageId)
     {
         var extension = await _extensionManager.GetSummaryByPackageIdAsync(packageId);
-        return _mapper.Map<ApiV2ExtensionSummary>(extension);
+        return _mapper.Map<ApiV2ExtensionSummary>(extension)!;
     }
 
     [HttpGet("icon/{packageId}")]
@@ -80,7 +80,7 @@ public class ApiV2ExtensionsController : ControllerBase
             FileName = "icon.png",
             Inline = false
         };
-        Response.Headers.Add("Content-Disposition", contentDisposition.ToString());
+        Response.Headers.Append("Content-Disposition", contentDisposition.ToString());
 
         return File(iconFileStream, "image/png");
     }

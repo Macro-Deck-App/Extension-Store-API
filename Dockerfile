@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0.400-bullseye-slim-amd64
+FROM mcr.microsoft.com/dotnet/sdk:8.0.101-bookworm-slim-amd64
 
 WORKDIR /src
 

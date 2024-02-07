@@ -52,7 +52,7 @@ public class ExtensionFileManager : IExtensionFileManager
     public async Task<PagedList<ExtensionFile>> GetFilesAsync(string packageId, Pagination pagination)
     {
         var extensionFileEntities = await _extensionFileRepository.GetFilesAsync(packageId, pagination);
-        return _mapper.Map<PagedList<ExtensionFile>>(extensionFileEntities);
+        return _mapper.Map<PagedList<ExtensionFile>>(extensionFileEntities)!;
     }
 
     public async Task<ExtensionFile> GetFileAsync(string packageId, string? version, int? targetApiVersion = null)
@@ -62,7 +62,7 @@ public class ExtensionFileManager : IExtensionFileManager
         {
             throw new ErrorCodeException(ErrorCodes.VersionNotFound);
         }
-        var extensionFile = _mapper.Map<ExtensionFile>(extensionFileEntity);
+        var extensionFile = _mapper.Map<ExtensionFile>(extensionFileEntity)!;
         return extensionFile;
     }
 
@@ -82,7 +82,7 @@ public class ExtensionFileManager : IExtensionFileManager
         if (!extensionExists)
         {
             _logger.Information("{PackageId} does not exist yet", extensionManifest.PackageId);
-            var extension = _mapper.Map<Extension>(extensionManifest);
+            var extension = _mapper.Map<Extension>(extensionManifest)!;
             await _extensionManager.CreateAsync(extension);
         }
         
@@ -256,7 +256,6 @@ public class ExtensionFileManager : IExtensionFileManager
         await packageStream.CopyToAsync(tmpFileStream);
         tmpFileStream.Close();
         packageStream.Close();
-        await tmpFileStream.DisposeAsync();
         await packageStream.DisposeAsync();
         return tmpFilePath;
     }
