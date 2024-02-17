@@ -40,7 +40,6 @@ public class ExtensionRepository : IExtensionRepository
     {
         return await _context.GetNoTrackingSet<ExtensionEntity>()
             .Include(x => x.ExtensionFiles)
-            .Include(x => x.Downloads)
             .FirstOrDefaultAsync(x => x.PackageId == packageId);
     }
 

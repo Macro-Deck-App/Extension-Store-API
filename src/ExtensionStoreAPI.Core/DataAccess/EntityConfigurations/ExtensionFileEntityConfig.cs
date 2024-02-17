@@ -54,6 +54,6 @@ public class ExtensionFileEntityConfig : BaseCreatedEntityConfig<ExtensionFileEn
             .IsRequired();
 
         builder.Property(p => p.ExtensionId)
-            .HasColumnName("e_ref");
+            .HasColumnName(ColumnPrefix + "e_ref");
     }
 }

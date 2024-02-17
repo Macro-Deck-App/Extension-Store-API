@@ -13,5 +13,4 @@ public class ExtensionEntity : BaseCreatedUpdatedEntity
     public string GitHubRepository { get; set; } = string.Empty;
     public ulong? DSupportUserId { get; set; }
     public ICollection<ExtensionFileEntity>? ExtensionFiles { get; set; }
-    public ICollection<ExtensionDownloadInfoEntity>? Downloads { get; set; }
 }
