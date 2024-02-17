@@ -64,10 +64,5 @@ public class ExtensionEntityConfig : BaseCreatedUpdatedEntityConfig<ExtensionEnt
             .WithOne(e => e.ExtensionEntity)
             .HasForeignKey(e => e.ExtensionId)
             .OnDelete(DeleteBehavior.Cascade);
-        
-        builder.HasMany(p => p.Downloads)
-            .WithOne(e => e.ExtensionEntity)
-            .HasForeignKey(e => e.ExtensionId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }
