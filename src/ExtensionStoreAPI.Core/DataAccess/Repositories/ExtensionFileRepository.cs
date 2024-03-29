@@ -33,6 +33,7 @@ public class ExtensionFileRepository : IExtensionFileRepository
         return await _context.GetNoTrackingSet<ExtensionFileEntity>()
             .Include(x => x.ExtensionEntity)
             .Where(x => x.ExtensionEntity != null && x.ExtensionEntity.PackageId == packageId)
+            .OrderByDescending(x => x.Version)
             .ToPagedListAsync(pagination.Page, pagination.PageSize);
     }
 

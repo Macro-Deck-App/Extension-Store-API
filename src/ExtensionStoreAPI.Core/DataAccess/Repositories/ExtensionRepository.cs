@@ -68,6 +68,8 @@ public class ExtensionRepository : IExtensionRepository
                       || filter.ShowIconPacks && x.ExtensionType == ExtensionType.IconPack));
         }
 
+        query = query.OrderByDescending(x => x.CreatedTimestamp);
+
         return await query.ToPagedListAsync(pagination.Page, pagination.PageSize);
     }
 

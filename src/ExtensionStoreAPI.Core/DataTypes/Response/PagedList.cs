@@ -20,7 +20,8 @@ public class PagedList<T>
     public static async ValueTask<PagedList<T>> CreatePagedListAsync(IQueryable<T> query, int page, int pageSize)
     {
         var totalItems = await query.CountAsync();
-        var items = await query.Skip((page - 1) * pageSize)
+        var items = await query
+            .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 

@@ -31,7 +31,8 @@ public class MacroBotSink : ILogEventSink
         if (logEvent.Exception is { } exception)
         {
             fields.Add("{\"name\":\"Stack Trace\",\"value\":\"" +
-                       HttpUtility.JavaScriptStringEncode(exception.StackTrace) + "\",\"inline\":false}");
+                       HttpUtility.JavaScriptStringEncode(exception.StackTrace).Truncate(1024) +
+                       "\",\"inline\":false}");
         }
 
         var requestBody =
