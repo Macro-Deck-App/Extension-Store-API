@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using ExtensionStoreAPI.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -9,7 +10,7 @@ public static class LoggingConfiguration
 {
     public static IHostBuilder ConfigureSerilog(this IHostBuilder hostBuilder)
     {
-        return hostBuilder.UseSerilog((_, _, configuration) =>
+        return hostBuilder.UseSerilog((_, serviceProvider, configuration) =>
             configuration
                 .MinimumLevel.Verbose()
                 .MinimumLevel.Override("Microsoft",
@@ -20,6 +21,9 @@ public static class LoggingConfiguration
                     Debugger.IsAttached
                         ? LogEventLevel.Debug
                         : LogEventLevel.Information)
-                .WriteTo.Console(theme: AnsiConsoleTheme.Code));
+                .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+                .WriteTo.Logger(lc =>
+                    lc.Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Warning).WriteTo
+                        .MacroBotSink(serviceProvider)));
     }
 }

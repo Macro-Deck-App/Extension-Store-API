@@ -30,5 +30,10 @@ public class ExtensionDownloadInfoEntityConfig : BaseCreatedEntityConfig<Extensi
         
         builder.Property(p => p.ExtensionId)
             .HasColumnName(ColumnPrefix + "e_ref");
+
+        builder.HasOne(x => x.ExtensionEntity)
+            .WithMany(x => x.ExtensionDownloads)
+            .HasForeignKey(x => x.ExtensionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

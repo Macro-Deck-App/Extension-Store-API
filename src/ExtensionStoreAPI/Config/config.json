@@ -4,5 +4,11 @@
   },
   "authentication": {
     "admin_token": "test"
+  },
+  "logging": {
+    "macro-bot": {
+      "url": "",
+      "token": ""
+    }
   }
 }
