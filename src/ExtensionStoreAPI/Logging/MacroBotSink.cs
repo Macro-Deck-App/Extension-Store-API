@@ -26,10 +26,16 @@ public class MacroBotSink : ILogEventSink
         var message = HttpUtility.JavaScriptStringEncode(logEvent.RenderMessage());
 
         var fields = new List<string>
-            { "{\"name\":\"Level\",\"value\":\"" + logEvent.Level + "\",\"inline\":false}" };
+        {
+            "{\"name\":\"Time/Date (UTC)\n\",\"value\":\"" + DateTime.UtcNow + "\",\"inline\":false}",
+            "{\"name\":\"Level\",\"value\":\"" + logEvent.Level + "\",\"inline\":false}"
+        };
 
         if (logEvent.Exception is { } exception)
         {
+            fields.Add("{\"name\":\"Message\",\"value\":\"" +
+                       HttpUtility.JavaScriptStringEncode(exception.Message).Truncate(1024) +
+                       "\",\"inline\":false}");
             fields.Add("{\"name\":\"Stack Trace\",\"value\":\"" +
                        HttpUtility.JavaScriptStringEncode(exception.StackTrace).Truncate(1024) +
                        "\",\"inline\":false}");
