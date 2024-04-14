@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ExtensionStoreAPI.Core.Enums;
+using ExtensionStoreAPI.Core.Json;
 
 namespace ExtensionStoreAPI.Core.DataTypes.MacroDeck;
 
@@ -20,11 +21,11 @@ public class ExtensionManifest
      [JsonPropertyName("category")]
      public string? Category { get; set; }
 
-     [JsonPropertyName("author-discord-userid")]
+     [JsonPropertyName("author-discord-userid"), JsonConverter(typeof(StringToLongConverter))]
      public ulong? AuthorDiscordUserId { get; set; }
 
      [JsonPropertyName("repository")]
-     public string? Repository { get; set; } = "";
+     public string? Repository { get; set; } = string.Empty;
 
      [JsonPropertyName("packageId")]
      public string? PackageId { get; set; }
@@ -36,34 +37,26 @@ public class ExtensionManifest
      public int? TargetPluginApiVersion { get; set; }
 
      [JsonPropertyName("dll")]
-     public string? Dll { get; set; } = "";
-
-     public static string SerializeAsync(ExtensionManifest extensionManifest)
-     {
-         var serialized = JsonSerializer.Serialize(extensionManifest);
-         return serialized;
-     }
+     public string? Dll { get; set; } = string.Empty;
 
      public static async Task<ExtensionManifest?> FromZipFilePathAsync(string zipFilePath)
      {
-         using var zipFile = ZipFile.OpenRead(zipFilePath);
-         var extensionManifestFileEntry = zipFile.Entries
-             .FirstOrDefault(x => x.Name.Equals(Constants.ExtensionManifestFileName, StringComparison.InvariantCulture));
+         var zipFile = ZipFile.OpenRead(zipFilePath);
+         var extensionManifestFileEntry = zipFile.Entries.FirstOrDefault(x =>
+             x.Name.Equals(Constants.ExtensionManifestFileName, StringComparison.InvariantCulture));
          
          if (extensionManifestFileEntry == null)
          {
              return null;
          }
-         
-         await using var stream = new StreamReader(extensionManifestFileEntry.Open(), Encoding.UTF8).BaseStream;
-         
-         return  await FromJsonStreamAsync(stream);
-     }
 
-     public static async Task<ExtensionManifest?> FromJsonStreamAsync(Stream stream)
-     {
-         var extensionManifest = await JsonSerializer.DeserializeAsync<ExtensionManifest>(stream);
-         stream.Close();
+         var fileEntryStream = extensionManifestFileEntry.Open();
+         var fileEntryBaseStream = new StreamReader(fileEntryStream, Encoding.UTF8).BaseStream;
+         var extensionManifest = await JsonSerializer.DeserializeAsync<ExtensionManifest>(fileEntryBaseStream);
+
+         await fileEntryStream.DisposeAsync();
+         await fileEntryBaseStream.DisposeAsync();
+         zipFile.Dispose();
          return extensionManifest;
      }
 }
